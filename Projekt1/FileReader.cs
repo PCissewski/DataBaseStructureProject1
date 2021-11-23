@@ -9,12 +9,12 @@ namespace Projekt1;
         public void Read(string path)
         {
             var files = Directory.GetFiles(path);
-            Array.ForEach(files,Console.WriteLine);
+            var output = files.Select(FetchRecord).ToList();
         }
         
-        private static string FetchRecord(string file)
+        private string FetchRecord(string file)
         {
-            
+            Console.WriteLine(file);
             return file;
         }
     }
