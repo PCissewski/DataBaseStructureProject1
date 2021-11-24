@@ -6,15 +6,25 @@ namespace Projekt1;
 
     public class FileReader
     {
-        public void Read(string path)
+        public void ReadRecordsFromFile(string path)
         {
             var files = Directory.GetFiles(path);
-            var output = files.Select(FetchRecord).ToList();
+            var filesList = files.ToList(); // list of files
+            var records = File.ReadAllLines(filesList[0]); // records in one file
+            PrintRecords(records);
         }
         
-        private string FetchRecord(string file)
+        private string FetchRecord(string[] records)
         {
-            Console.WriteLine(file);
-            return file;
+            var record = "elo";
+            return record;
+        }
+
+        private static void PrintRecords(string[] records)
+        {
+            foreach (var rec in records)
+            {
+                Console.WriteLine(rec);
+            }
         }
     }
