@@ -1,30 +1,32 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace Projekt1;
 
     public class FileReader
     {
-        public void ReadRecordsFromFile(string path)
+        public string ReadRecord(string path)
         {
+            var data = new byte[50];
+            var offset = 0;
             var files = Directory.GetFiles(path);
-            var filesList = files.ToList(); // list of files
-            var records = File.ReadAllLines(filesList[0]); // records in one file
-            PrintRecords(records);
-        }
-        
-        private string FetchRecord(string[] records)
-        {
-            var record = "elo";
-            return record;
-        }
-
-        private static void PrintRecords(string[] records)
-        {
-            foreach (var rec in records)
+            var fs = File.Open(files[0], FileMode.Open);
+            
+            while (true)
             {
-                Console.WriteLine(rec);
+                fs.Read(data, offset, 10);
+
+                var temp = Encoding.ASCII.GetString(data);
+                
+                if (temp.Contains("\r\n"))
+                {
+                    var record = temp.Split("\r");
+                    return record[0];
+                }
+                
+                offset += 10;
             }
         }
     }

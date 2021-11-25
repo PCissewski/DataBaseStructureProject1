@@ -1,3 +1,5 @@
+using System;
+using Projekt1.data;
 using Projekt1.generator;
 
 namespace Projekt1;
@@ -6,10 +8,9 @@ namespace Projekt1;
     {
         static void Main(string[] args)
         {
-            var gen = new Generator();
-            var record = gen.SingleRecord(args);
-
-            //   var reader = new FileReader();
-            // reader.ReadRecordsFromFile(args[0]);
+            var f = new FileReader();
+            var test = f.ReadRecord(args[0]);
+            Console.WriteLine(test);
+            
         }
     }
