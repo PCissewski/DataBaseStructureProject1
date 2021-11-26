@@ -9,8 +9,7 @@ namespace Projekt1;
         static void Main(string[] args)
         {
             var f = new FileReader();
-            var test = f.ReadRecord(args[0]);
-            Console.WriteLine(test);
-            
+            f.ReadRecord(args[0]);
+
         }
     }
