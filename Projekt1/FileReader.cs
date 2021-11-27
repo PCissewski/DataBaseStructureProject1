@@ -32,10 +32,13 @@ namespace Projekt1;
                     var record = temp.Split("\r");
                     
                     var trimmedString = record[1].TrimEnd('\0'); // remove \0 bytes
+                    
                     var cont = Encoding.ASCII.GetByteCount(trimmedString);
                     var setBack = cont - 1;
+                    
                     fs.Position -= setBack; // offset from which byte read next record
-                    offset = -10;
+                    offset = -10; // assign -10 so it can read all records
+                    
                     Console.WriteLine(record[0]);
                     Array.Clear(data, 0, data.Length);
                     //return record[0];
