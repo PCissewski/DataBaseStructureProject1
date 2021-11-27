@@ -24,7 +24,7 @@ namespace Projekt1;
                 var eof = fs.Read(data, offset, 10);
                 if (eof == 0)
                     return;
-
+                
                 var temp = Encoding.ASCII.GetString(data);
                 
                 if (temp.Contains("\r\n"))

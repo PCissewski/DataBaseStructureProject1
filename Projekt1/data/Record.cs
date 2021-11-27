@@ -32,7 +32,7 @@ namespace Projekt1.data
 
         public static int GetSavedRecordSize()
         {
-            return 2 + Encoding.ASCII.GetByteCount(_person); // + 2 because of CR and LF bytes
+            return 1 + Encoding.ASCII.GetByteCount(_person); // + 1 because of semi colon to rozdzielic imiona
         }
 
         private String GetValue()
@@ -42,7 +42,7 @@ namespace Projekt1.data
 
         public byte[] GetSaveValue()
         {
-            return  Encoding.ASCII.GetBytes($"{_person}\r\n");
+            return  Encoding.ASCII.GetBytes($"{_person};");
         }
         
         public int LexicographicOrder(Record t)

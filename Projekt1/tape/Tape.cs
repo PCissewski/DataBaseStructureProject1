@@ -15,7 +15,8 @@ namespace Projekt1.tape
         {
             var fs = File.Open(path, FileMode.Open);
             _pageBuffer = new Page();
-            _buffer = _pageBuffer.GetBuffer();
+            _buffer = new byte[fs.Length];
+            fs.Close();
             last = null;
         }
 
