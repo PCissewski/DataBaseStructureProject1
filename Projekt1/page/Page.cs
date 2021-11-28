@@ -81,6 +81,11 @@ namespace Projekt1.page
             return _currentSize > _pageSize - Record.GetSavedRecordSize();
         }
 
+        public bool IsEmpty()
+        {
+            return _currentSize == _position;
+        }
+
         public static int GetMaxRecords()
         {
             return _pageSize / Record.GetSavedRecordSize();

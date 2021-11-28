@@ -7,9 +7,9 @@ namespace Projekt1
 {
     public class ProgramController
     {
-        Tape t1 = new ("t1.txt");
-        Tape t2 = new ("t2.txt");
-        Tape t3 = new ("t3.txt");
+        Tape _tape1 = new ("t1.txt");
+        Tape _tape2 = new ("t2.txt");
+        Tape _tape3 = new ("t3.txt");
         
         /// <summary>
         /// load data from the file to a tape 3
@@ -38,19 +38,37 @@ namespace Projekt1
                     fs.Position -= setBack;
                     offset = -10;
                     
-                    t3.AddRecord(new Record(record[0]));
+                    _tape3.AddRecord(new Record(record[0]));
                 }
 
                 offset += 10;
 
             }
             
-            t3.Flush();
+            _tape3.Flush();
         }
-
+        
         public void SplitBetweenTapes()
         {
-            
+            var F_n = 1;
+            var F_n1 = 0;
+            var F_n2 = 0;
+            var seriesCount = 0;
+
+            var tape = _tape1;
+            Record rec = null;
+            Record prevRecord;
+
+            while (_tape3.CanRead())
+            {
+                prevRecord = tape.GetLastRecord();
+            }
+
+        }
+
+        public Tape PolyphaseMergeSort()
+        {
+            return null;
         }
     }
 }

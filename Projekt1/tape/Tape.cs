@@ -9,7 +9,7 @@ namespace Projekt1.tape
     {
         private Page _pageBuffer;
         private byte[] _buffer;
-        private Record _last;
+        private Record _lastRecord;
         private FileStream _fs = null;
         private string _fileName;
         
@@ -21,12 +21,12 @@ namespace Projekt1.tape
             _fs = File.Open(name, FileMode.Open);
             _pageBuffer = new Page();
             _buffer = _pageBuffer.GetBuffer();
-            _last = null;
+            _lastRecord = null;
         }
 
         public void AddRecord(Record record)
         {
-            _last = record;
+            _lastRecord = record;
             if (_pageBuffer.IsFull())
             {
                 FlushBufferPage();
@@ -37,6 +37,11 @@ namespace Projekt1.tape
         public Record GetRecord()
         {
             return _pageBuffer.ReadRecord();
+        }
+
+        public Record GetLastRecord()
+        {
+            return _lastRecord;
         }
 
         private void CloseFile()
@@ -82,6 +87,16 @@ namespace Projekt1.tape
             _pageBuffer.ClearBuffer();
             var size = _fs.Read(_buffer, 0, Page.GetMaxRecords() * Record.GetSavedRecordSize());
             _pageBuffer.SetCurrentSize(size);
+        }
+
+        public bool CanRead()
+        {
+            if (_pageBuffer.IsEmpty())
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }
