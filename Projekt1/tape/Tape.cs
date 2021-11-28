@@ -9,19 +9,28 @@ namespace Projekt1.tape
     {
         private Page _pageBuffer;
         private byte[] _buffer;
-        private Record last;
-
-        public Tape(string path)
+        private Record _last;
+        private FileStream _fs = null;
+        private string _fileName;
+        
+        public Tape(string name)
         {
-            var fs = File.Open(path, FileMode.Open);
+            _fileName = name;
+            FileStream newFile = File.Create(name);
+            newFile.Close();
+            _fs = File.Open(name, FileMode.Open);
             _pageBuffer = new Page();
-            _buffer = new byte[fs.Length];
-            fs.Close();
-            last = null;
+            _buffer = _pageBuffer.GetBuffer();
+            _last = null;
         }
 
         public int AddRecord(Record record)
         {
+            _last = record;
+            if (_pageBuffer.IsFull())
+            {
+                FlushBufferPage();
+            }
             return _pageBuffer.InsertRecord(record);
         }
 
@@ -30,11 +39,11 @@ namespace Projekt1.tape
             return _pageBuffer.ReadRecord();
         }
 
-        public void CloseFile(FileStream fs)
+        private void CloseFile()
         {
             try
             {
-                fs.Close();
+                _fs.Close();
             }
             catch (IOException e)
             {
@@ -42,6 +51,35 @@ namespace Projekt1.tape
                 throw;
             }
         }
+        /// <summary>
+        /// Close file to see that something appeared in text file
+        /// </summary>
+        public void Flush()
+        {
+            FlushBufferPage();
+            _fs.Flush();
+            CloseFile();
+        }
         
+        /// <summary>
+        /// Save buffer content into the file
+        /// </summary>
+        /// <returns>return 0 on success</returns>
+        private void FlushBufferPage()
+        {
+            _fs.Write(_buffer, 0, _pageBuffer.GetCurrentSize());
+            
+            _pageBuffer.ClearBuffer();
+        }
+        
+        /// <summary>
+        /// Fill buffer with data to read
+        /// </summary>
+        private void FillBuffer()
+        {
+            _pageBuffer.ClearBuffer();
+            var size = _fs.Read(_buffer, 0, Page.GetMaxRecords() * Record.GetSavedRecordSize());
+            _pageBuffer.SetCurrentSize(size);
+        }
     }
 }

@@ -7,17 +7,18 @@ namespace Projekt1
 {
     public class MainController
     {
-        Tape t1 = new ("X:/InformatykaSemestr5/SBD/Project1/Projekt1/Projekt1/InputFiles/1.txt");
-        Tape t2 = new ("X:/InformatykaSemestr5/SBD/Project1/Projekt1/Projekt1/InputFiles/2.txt");
-        Tape t3 = new ("X:/InformatykaSemestr5/SBD/Project1/Projekt1/Projekt1/InputFiles/3.txt");
+        Tape t1 = new ("t1.txt");
+        Tape t2 = new ("t2.txt");
+        Tape t3 = new ("t3.txt");
         
         /// <summary>
         /// load data from the file to a tape 3
         /// </summary>
-        public void LoadData()
+        public void LoadData(string path)
         {
-            FileStream fs = File.Open("X:/InformatykaSemestr5/SBD/Project1/Projekt1/Projekt1/InputFiles/1.txt", FileMode.Open);
+            FileStream fs = File.Open(path, FileMode.Open);
             var offset = 0;
+            
             while (true)
             {
                 var buffer = new byte[50];
@@ -43,6 +44,8 @@ namespace Projekt1
                 offset += 10;
 
             }
+            
+            t3.Flush();
         }
         
     }

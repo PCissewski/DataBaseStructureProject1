@@ -6,7 +6,7 @@ namespace Projekt1.page
     
     public class Page
     {
-        private int _pageSize = 100;
+        private static int _pageSize = 100;
         private int _currentSize;
         private int _position;
 
@@ -23,6 +23,12 @@ namespace Projekt1.page
         {
             _pageSize = size;
         }
+
+        public void SetCurrentSize(int size)
+        {
+            _currentSize = size;
+        }
+        
         /// <summary>
         /// Insert one record
         /// </summary>
@@ -57,6 +63,27 @@ namespace Projekt1.page
             var value = Record.GetSavedValue(temp);
             
             return new Record(value);
+        }
+
+        public int GetCurrentSize()
+        {
+            return _currentSize;
+        }
+
+        public void ClearBuffer()
+        {
+            _currentSize = 0;
+            _position = 0;
+        }
+
+        public bool IsFull()
+        {
+            return _currentSize > _pageSize - Record.GetSavedRecordSize();
+        }
+
+        public static int GetMaxRecords()
+        {
+            return _pageSize / Record.GetSavedRecordSize();
         }
         
     }

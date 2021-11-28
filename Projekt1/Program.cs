@@ -13,7 +13,7 @@ namespace Projekt1;
         static void Main(string[] args)
         {
             var app = new MainController();
-            app.LoadData();
+            app.LoadData(args[3]);
         }
         
     }
