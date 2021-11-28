@@ -24,14 +24,14 @@ namespace Projekt1.tape
             _last = null;
         }
 
-        public int AddRecord(Record record)
+        public void AddRecord(Record record)
         {
             _last = record;
             if (_pageBuffer.IsFull())
             {
                 FlushBufferPage();
             }
-            return _pageBuffer.InsertRecord(record);
+            _pageBuffer.InsertRecord(record);
         }
 
         public Record GetRecord()
@@ -53,6 +53,8 @@ namespace Projekt1.tape
         }
         /// <summary>
         /// Close file to see that something appeared in text file
+        /// Note: CloseFile is only to see content of file after Write
+        ///       Keep open for the duration of the alg.
         /// </summary>
         public void Flush()
         {

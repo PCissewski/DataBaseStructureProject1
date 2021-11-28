@@ -14,7 +14,7 @@ namespace Projekt1.data
         {
             _person = person;
         }
-
+        
         public static String GetSavedValue(byte[] save)
         {
             if (save.Length == GetSavedRecordSize())
@@ -24,22 +24,25 @@ namespace Projekt1.data
 
             return null;
         }
-
+        
         public static int GetRecordSize()
         {
             return Encoding.ASCII.GetByteCount(_person);
         }
-
+        /// <summary>
+        /// Get size of a saved record, +1 because of ';' delimiter
+        /// </summary>
+        /// <returns>number of bytes to save</returns>
         public static int GetSavedRecordSize()
         {
-            return 1 + Encoding.ASCII.GetByteCount(_person); // + 1 because of semi colon to rozdzielic imiona
+            return 1 + Encoding.ASCII.GetByteCount(_person);
         }
 
         private String GetValue()
         {
             return _person;
         }
-
+        
         public byte[] GetSaveValue()
         {
             return  Encoding.ASCII.GetBytes($"{_person};");

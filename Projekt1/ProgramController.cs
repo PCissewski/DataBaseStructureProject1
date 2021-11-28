@@ -5,7 +5,7 @@ using Projekt1.tape;
 
 namespace Projekt1
 {
-    public class MainController
+    public class ProgramController
     {
         Tape t1 = new ("t1.txt");
         Tape t2 = new ("t2.txt");
@@ -47,6 +47,10 @@ namespace Projekt1
             
             t3.Flush();
         }
-        
+
+        public void SplitBetweenTapes()
+        {
+            
+        }
     }
 }

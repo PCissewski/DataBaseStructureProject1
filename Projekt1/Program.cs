@@ -1,10 +1,4 @@
-using System;
-using System.IO;
-using System.Text;
 using Projekt1;
-using Projekt1.data;
-using Projekt1.generator;
-using Projekt1.tape;
 
 namespace Projekt1;
 
@@ -12,8 +6,9 @@ namespace Projekt1;
     {
         static void Main(string[] args)
         {
-            var app = new MainController();
+            var app = new ProgramController();
             app.LoadData(args[3]);
+            app.SplitBetweenTapes();
         }
         
     }
