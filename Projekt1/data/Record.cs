@@ -17,12 +17,7 @@ namespace Projekt1.data
         
         public static String GetSavedValue(byte[] save)
         {
-            if (save.Length == GetSavedRecordSize())
-            {
-                return Encoding.ASCII.GetString(save);    
-            }
-
-            return null;
+            return Encoding.ASCII.GetString(save);
         }
         
         public static int GetRecordSize()
@@ -35,6 +30,12 @@ namespace Projekt1.data
         /// <returns>number of bytes to save</returns>
         public static int GetSavedRecordSize()
         {
+            var containsSemiColon = _person.Contains(';');
+
+            if (containsSemiColon)
+            {
+                return Encoding.ASCII.GetByteCount(_person);
+            }
             return 1 + Encoding.ASCII.GetByteCount(_person);
         }
 
@@ -45,7 +46,8 @@ namespace Projekt1.data
         
         public byte[] GetSaveValue()
         {
-            return  Encoding.ASCII.GetBytes($"{_person};");
+            var trimmedString = _person.TrimEnd(';');
+            return  Encoding.ASCII.GetBytes($"{trimmedString};");
         }
         
         public int LexicographicOrder(Record t)

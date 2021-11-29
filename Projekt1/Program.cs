@@ -7,6 +7,7 @@ namespace Projekt1;
         static void Main(string[] args)
         {
             var app = new ProgramController();
+
             app.LoadData(args[3]);
             app.SplitBetweenTapes();
         }

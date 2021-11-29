@@ -56,10 +56,24 @@ namespace Projekt1.page
             {
                 return null;
             }
+            // przeszukiwac buffer az sie nie znajdzie srednika i wtedy odczytac i do tempa wrzucic
+            var i = 0;
+            var counter = 0;
+            while (true)
+            {
+                var semiColon = _pageBuffer[i];
+                counter += 1;
+                if (semiColon == 59)
+                {
+                    break;
+                }
 
-            var temp = new byte[Record.GetSavedRecordSize()];
-            Array.Copy(_pageBuffer, _position, temp, 0, Record.GetSavedRecordSize());
-            _position += Record.GetSavedRecordSize();
+                i += 1;
+            }
+
+            var temp = new byte[counter];
+            Array.Copy(_pageBuffer, _position, temp, 0, counter);
+            _position += counter;
             var value = Record.GetSavedValue(temp);
             
             return new Record(value);
@@ -85,7 +99,7 @@ namespace Projekt1.page
         {
             return _currentSize == _position;
         }
-
+        // TODO Fix this 
         public static int GetMaxRecords()
         {
             return _pageSize / Record.GetSavedRecordSize();

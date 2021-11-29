@@ -13,12 +13,13 @@ namespace Projekt1
         
         /// <summary>
         /// load data from the file to a tape 3
+        /// called only once at the beginning 
         /// </summary>
         public void LoadData(string path)
         {
             FileStream fs = File.Open(path, FileMode.Open);
             var offset = 0;
-            
+            _tape3.DefaultFileSettings();
             while (true)
             {
                 var buffer = new byte[50];
@@ -54,16 +55,83 @@ namespace Projekt1
             var F_n1 = 0;
             var F_n2 = 0;
             var seriesCount = 0;
+            
+            _tape1.DefaultFileSettings();
+            _tape2.DefaultFileSettings();
 
             var tape = _tape1;
             Record rec = null;
             Record prevRecord;
+            var wchichTape = true;
+            var series = false;
+            var continueSeries = false;
+            _tape3.OpenFile(); // open file to transfer data to tape 1 and 2
 
-            while (_tape3.CanRead())
+            rec = _tape3.GetRecord();
+            
+            tape.AddRecord(rec);
+            _tape1.Flush();
+            
+            while (_tape3.CanRead() && false)
             {
                 prevRecord = tape.GetLastRecord();
-            }
+                if (!series)
+                {
+                    rec = _tape3.GetRecord();    
+                }
 
+                if (rec != null && !series)
+                {
+                    seriesCount += 1;
+                    series = true;
+                    if (seriesCount == F_n)
+                    {
+                        // next Fibonacci number 
+                        F_n2 = F_n1;
+                        F_n1 = F_n;
+                        F_n = GetNextFibonacci(F_n1, F_n2);
+                        tape.SetSeriesCount(seriesCount);
+                    
+                        // change tape
+                        if (wchichTape)
+                        {
+                            tape = _tape2;
+                            wchichTape = false;
+                        }
+                        else if(!wchichTape)
+                        {
+                            tape = _tape1;
+                            wchichTape = true;
+                        }
+                    
+                        seriesCount = tape.GetSeriesCount(); // get series count of changed tape
+                    }
+                    continue;
+                }
+                
+                
+
+                if (rec != null)
+                {
+                    tape.AddRecord(rec);
+                    series = false;
+                    rec = null;
+                }
+                
+            }
+            
+            
+
+            
+            //_tape1.Flush();
+            //_tape2.Flush();
+            //_tape3.DefaultFileSettings();
+            
+        }
+
+        private int GetNextFibonacci(int f1, int f2)
+        {
+            return f1 + f2;
         }
 
         public Tape PolyphaseMergeSort()
