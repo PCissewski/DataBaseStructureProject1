@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Text;
 
 namespace Projekt1.data
@@ -39,9 +40,14 @@ namespace Projekt1.data
             return 1 + Encoding.ASCII.GetByteCount(_person);
         }
 
-        private String GetValue()
+        public String GetValue()
         {
             return _person;
+        }
+
+        public void SetValue(string value)
+        {
+            _person = value + _person;
         }
         
         public byte[] GetSaveValue()

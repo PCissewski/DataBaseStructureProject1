@@ -11,12 +11,14 @@ namespace Projekt1.page
         private int _position;
 
         private byte[] _pageBuffer;
-
+        private byte[] _nextPage;
+        
         public Page()
         {
             _currentSize = 0;
             _position = 0;
             _pageBuffer = new byte[_pageSize];
+            _nextPage = new byte[25];
         }
 
         public void SetPageSize(int size)
@@ -61,12 +63,13 @@ namespace Projekt1.page
             var counter = 0;
             while (true)
             {
-                var semiColon = _pageBuffer[i];
+                var semiColon = _pageBuffer[_position + i];
                 counter += 1;
-                if (semiColon == 59)
+                if (semiColon == 59 || _position + i + 1 == _pageSize)
                 {
                     break;
                 }
+                
 
                 i += 1;
             }
@@ -100,9 +103,9 @@ namespace Projekt1.page
             return _currentSize == _position;
         }
         // TODO Fix this 
-        public static int GetMaxRecords()
+        public static int GetPageSize()
         {
-            return _pageSize / Record.GetSavedRecordSize();
+            return _pageSize;
         }
         
     }

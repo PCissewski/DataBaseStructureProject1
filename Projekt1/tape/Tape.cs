@@ -12,6 +12,7 @@ namespace Projekt1.tape
         private Record _lastRecord;
         private Stream _fs = null;
         private string _fileName;
+        
         private int _seriesCount;
         private int _emptySeriesCount;
         
@@ -56,7 +57,7 @@ namespace Projekt1.tape
             _fs = File.Open(_fileName, FileMode.Open);
         }
 
-        private void CloseFile()
+        public void CloseFile()
         {
             try
             {
@@ -100,13 +101,13 @@ namespace Projekt1.tape
         private void FillBuffer()
         {
             _pageBuffer.ClearBuffer();
-            var size = _fs.Read(_buffer, 0, 100);
+            var size = _fs.Read(_buffer, 0, Page.GetPageSize());
             _pageBuffer.SetCurrentSize(size);
         }
 
         public bool CanRead()
         {
-            if (!_pageBuffer.IsEmpty() || _fs.Length > 0)
+            if (!_pageBuffer.IsEmpty())
             {
                 return true;
             }

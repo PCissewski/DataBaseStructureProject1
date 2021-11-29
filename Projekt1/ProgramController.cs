@@ -65,11 +65,39 @@ namespace Projekt1
             var wchichTape = true;
             var series = false;
             var continueSeries = false;
+            var toMergeRecord = "";
+            var merge = false;
             _tape3.OpenFile(); // open file to transfer data to tape 1 and 2
-
-            rec = _tape3.GetRecord();
             
-            tape.AddRecord(rec);
+            // Read occurs when page buffer is empty
+            // Write occurs when we want to flush content into the file
+            do
+            {
+                // od tego miejsca
+                rec = _tape3.GetRecord();
+
+                if (rec is null)
+                {
+                    break;
+                }
+                
+                if (merge)
+                {
+                    rec.SetValue(toMergeRecord);
+                    merge = false;
+                }
+                
+                if (rec != null && !rec.GetValue().Contains(';'))
+                {
+                    toMergeRecord = rec.GetValue();
+                    merge = true;
+                    continue;
+                }
+                // do tego miejsca jest wczytywanie rekordu tak nie wiem
+                
+                
+                tape.AddRecord(rec);
+            } while (true);
             _tape1.Flush();
             
             while (_tape3.CanRead() && false)
