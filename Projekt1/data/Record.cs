@@ -6,7 +6,7 @@ namespace Projekt1.data
 {
     public class Record
     {
-        private static string _person;
+        private string _person;
         /// <summary>
         /// Create record with given Value
         /// </summary>
@@ -21,7 +21,7 @@ namespace Projekt1.data
             return Encoding.ASCII.GetString(save);
         }
         
-        public static int GetRecordSize()
+        public int GetRecordSize()
         {
             return Encoding.ASCII.GetByteCount(_person);
         }
@@ -29,7 +29,7 @@ namespace Projekt1.data
         /// Get size of a saved record, +1 because of ';' delimiter
         /// </summary>
         /// <returns>number of bytes to save</returns>
-        public static int GetSavedRecordSize()
+        public int GetSavedRecordSize()
         {
             var containsSemiColon = _person.Contains(';');
 

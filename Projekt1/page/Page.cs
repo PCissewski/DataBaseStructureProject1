@@ -38,13 +38,13 @@ namespace Projekt1.page
         /// <returns>0 on success and -1 when there is no space in buffer</returns>
         public int InsertRecord(Record rec)
         {
-            if (Record.GetRecordSize() + _currentSize > _pageSize)
+            if (rec.GetRecordSize() + _currentSize > _pageSize)
             {
                 return -1;
             }
             // copy record and the end of currently used buffer
-            Array.Copy(rec.GetSaveValue(), 0, _pageBuffer, _currentSize, Record.GetSavedRecordSize());
-            _currentSize += Record.GetSavedRecordSize();
+            Array.Copy(rec.GetSaveValue(), 0, _pageBuffer, _currentSize, rec.GetSavedRecordSize());
+            _currentSize += rec.GetSavedRecordSize();
             return 0;
         }
 
@@ -78,7 +78,7 @@ namespace Projekt1.page
             Array.Copy(_pageBuffer, _position, temp, 0, counter);
             _position += counter;
             var value = Record.GetSavedValue(temp);
-            
+
             return new Record(value);
         }
 
@@ -93,9 +93,9 @@ namespace Projekt1.page
             _position = 0;
         }
 
-        public bool IsFull()
+        public bool IsFull(Record record)
         {
-            return _currentSize > _pageSize - Record.GetSavedRecordSize();
+            return _currentSize > _pageSize - record.GetSavedRecordSize();
         }
 
         public bool IsEmpty()

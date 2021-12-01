@@ -12,6 +12,8 @@ namespace Projekt1.tape
         private Record _lastRecord;
         private Stream _fs = null;
         private string _fileName;
+        private int _writeCounter = 0;
+        private int _readCounter = 0;
         
         private int _seriesCount;
         private int _emptySeriesCount;
@@ -19,8 +21,6 @@ namespace Projekt1.tape
         public Tape(string name)
         {
             _fileName = name;
-            //FileStream newFile = File.Create(name);
-            //newFile.Close();
             _fs = File.Open(name, FileMode.Open, FileAccess.ReadWrite);
             _pageBuffer = new Page();
             _buffer = _pageBuffer.GetBuffer();
@@ -30,7 +30,7 @@ namespace Projekt1.tape
         public void AddRecord(Record record)
         {
             _lastRecord = record;
-            if (_pageBuffer.IsFull())
+            if (_pageBuffer.IsFull(record))
             {
                 FlushBufferPage();
             }
@@ -78,7 +78,8 @@ namespace Projekt1.tape
         {
             FlushBufferPage();
             _fs.Flush();
-            CloseFile();
+            _fs.Position = 0;
+            //CloseFile();
         }
         
         /// <summary>
@@ -88,6 +89,7 @@ namespace Projekt1.tape
         /// <returns>return 0 on success</returns>
         private void FlushBufferPage()
         {
+            _writeCounter += 1;
             _fs.Write(_buffer, 0, _pageBuffer.GetCurrentSize());
             
             _pageBuffer.ClearBuffer();
@@ -100,6 +102,7 @@ namespace Projekt1.tape
         /// TODO Fix this, count gives fake information, now its hard coded
         private void FillBuffer()
         {
+            _readCounter += 1;
             _pageBuffer.ClearBuffer();
             var size = _fs.Read(_buffer, 0, Page.GetPageSize());
             _pageBuffer.SetCurrentSize(size);
@@ -107,7 +110,7 @@ namespace Projekt1.tape
 
         public bool CanRead()
         {
-            if (!_pageBuffer.IsEmpty())
+            if (!_pageBuffer.IsEmpty() || _fs.Length - _fs.Position > 0)
             {
                 return true;
             }
@@ -136,7 +139,19 @@ namespace Projekt1.tape
             _pageBuffer.ClearBuffer();
             _seriesCount = 0;
             _emptySeriesCount = 0;
+            _fs.SetLength(0);
+            _fs.Close();
+            _fs = File.Open(_fileName, FileMode.Open);
         }
-        
+
+        public int GetWriteCounter()
+        {
+            return _writeCounter;
+        }
+
+        public int GetReadCounter()
+        {
+            return _readCounter;
+        }
     }
 }

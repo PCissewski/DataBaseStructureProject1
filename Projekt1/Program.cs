@@ -9,7 +9,8 @@ namespace Projekt1;
             var app = new ProgramController();
 
             app.LoadData(args[3]);
-            app.SplitBetweenTapes();
+            //app.Sort();
+            app.SplitTape();
         }
         
     }
