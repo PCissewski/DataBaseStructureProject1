@@ -1,6 +1,7 @@
 using Projekt1;
 
-namespace Projekt1;
+namespace Projekt1
+{
 
     class Program
     {
@@ -10,7 +11,9 @@ namespace Projekt1;
 
             app.LoadData(args[3]);
             //app.Sort();
-            app.SplitTape();
+            app.SplitBetweenTapes();
+            app.PolyphaseMergeSort();
         }
-        
+
     }
+}
