@@ -11,6 +11,8 @@ namespace Projekt1
         Tape _tape1 = new ("t1.txt");
         Tape _tape2 = new ("t2.txt");
         Tape _tape3 = new ("t3.txt");
+
+        private int _biggerTape;
         
         /// <summary>
         /// load data from the file to a tape 3
@@ -30,7 +32,7 @@ namespace Projekt1
                     break;
                 }
                 var temp = Encoding.ASCII.GetString(buffer);
-                if (temp.Contains("\r\n"))
+                if (temp.Contains("\r\n") || temp.Contains("\n") || temp.Contains("\r"))
                 {
                     var record = temp.Split("\r");
                     var trimmedString = record[1].TrimEnd('\0');
@@ -61,7 +63,7 @@ namespace Projekt1
 
             Tape tape = _tape1;
             Record record = null; 
-            Record prevRecord = null;
+            Record prevRecord;
             var tapeChooser = 0;
             bool newSeries = false;
             bool contSeries = false;
@@ -91,7 +93,7 @@ namespace Projekt1
                     continue;
                 }
 
-                if (record != null && prevRecord != null && record.LexicographicOrder(prevRecord) < 0 && !newSeries)
+                if (record != null && prevRecord != null)
                 {
                     seriesCounter++;
                     newSeries = true;
@@ -133,10 +135,20 @@ namespace Projekt1
                     seriesCounter++;
                 }
             }
+
+            if (tape == _tape1)
+            {
+                _biggerTape = 1;
+            }
+            else
+            {
+                _biggerTape = 0;
+            }
+            
             _tape1.Flush();
-            //_tape1.CloseFile();
+            _tape1.CloseFile();
             _tape2.Flush();
-            //_tape2.CloseFile();
+            _tape2.CloseFile();
             
             Console.WriteLine($"Number of writes to a disk: {_tape1.GetWriteCounter() + _tape2.GetWriteCounter() + _tape3.GetWriteCounter()}");
             Console.WriteLine($"Number of reads from a disk: {_tape1.GetReadCounter() + _tape2.GetReadCounter() + _tape3.GetReadCounter()}");
@@ -146,13 +158,29 @@ namespace Projekt1
         
         public Tape PolyphaseMergeSort()
         {
-            var tapeBig = _tape2;
-            var tapeSmall = _tape1;
+            Tape tapeBig;
+            Tape tapeSmall;
             var tapeResult = _tape3;
+
+            if (_biggerTape == 1)
+            {
+                tapeBig = _tape2;
+                tapeSmall = _tape1;
+            }
+            else if (_biggerTape == 0)
+            {
+                tapeBig = _tape1;
+                tapeSmall = _tape2;
+            }
+            else
+            {
+                return null;
+            }
             
-            tapeBig.OpenFile();
+            
+            //tapeBig.OpenFile();
             //tapeResult.OpenFile();
-            tapeSmall.OpenFile();
+            //tapeSmall.OpenFile();
 
             Record recordBig = null;
             Record recordSmall = null;
