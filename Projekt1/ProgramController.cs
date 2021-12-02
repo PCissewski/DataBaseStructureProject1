@@ -93,7 +93,7 @@ namespace Projekt1
                     continue;
                 }
 
-                if (record != null && prevRecord != null)
+                if (record != null && prevRecord != null && record.LexicographicOrder(prevRecord) < 0)
                 {
                     seriesCounter++;
                     newSeries = true;
@@ -150,8 +150,7 @@ namespace Projekt1
             _tape2.Flush();
             //_tape2.CloseFile();
             
-            Console.WriteLine($"Number of writes to a disk: {_tape1.GetWriteCounter() + _tape2.GetWriteCounter() + _tape3.GetWriteCounter()}");
-            Console.WriteLine($"Number of reads from a disk: {_tape1.GetReadCounter() + _tape2.GetReadCounter() + _tape3.GetReadCounter()}");
+            ShowReadsWritesToDisk();
             _tape3.DefaultFileSettings();
         }
         
@@ -175,12 +174,7 @@ namespace Projekt1
             {
                 return null;
             }
-            
-            
-            //tapeBig.OpenFile();
-            //tapeResult.OpenFile();
-            //tapeSmall.OpenFile();
-
+      
             Record recordBig = null;
             Record recordSmall = null;
             Record prevBig = null;
@@ -191,6 +185,9 @@ namespace Projekt1
             bool wroteRecSmall = true;
             bool endBig = false;
             bool endSmall;
+            bool merge = false;
+            bool smallMerge = false;
+            var toMergeRecord = "";
             
             // here later add which tape is which now its hard coded
 
@@ -206,12 +203,23 @@ namespace Projekt1
                     if (!endBig && tapeBig.DecEmptySeriesCount()) {
                         endBig = true;
                     }
-                    
-                    
+
                     if (wroteRecBig)
                     {
                         prevBig = recordBig;
                         recordBig = tapeBig.GetRecord();
+                        if (merge)
+                        {
+                            recordBig.SetValue(toMergeRecord);
+                            merge = false;
+                        }
+                
+                        if (recordBig != null && !recordBig.GetValue().Contains(';'))
+                        {
+                            toMergeRecord = recordBig.GetValue();
+                            merge = true;
+                            continue;
+                        }
                         wroteRecBig = false;
                     }
 
@@ -219,9 +227,21 @@ namespace Projekt1
                     {
                         prevSmall = recordSmall;
                         recordSmall = tapeSmall.GetRecord();
+                        if (merge)
+                        {
+                            recordSmall.SetValue(toMergeRecord);
+                            merge = false;
+                        }
+                
+                        if (recordSmall != null && !recordSmall.GetValue().Contains(';'))
+                        {
+                            toMergeRecord = recordSmall.GetValue();
+                            merge = true;
+                            continue;
+                        }
                         wroteRecSmall = false;
                     }
-                    
+
                     endBig = endBig || recordBig == null || (prevBig != null && prevBig.LexicographicOrder(recordBig) > 0);
                     endSmall = recordSmall == null || (prevSmall != null && prevSmall.LexicographicOrder(recordSmall) > 0);
                     
@@ -235,6 +255,7 @@ namespace Projekt1
                         if (!tapeSmall.CanRead() && recordSmall == null)
                         {
                             tapeResult.Flush();
+                            Console.WriteLine($"Number of merged series: {mergedSeries}");
                             break;
                         }
                         continue;
@@ -264,7 +285,7 @@ namespace Projekt1
                 }
                 tapeSmall.DefaultFileSettings();
 
-                Tape temp = tapeBig;
+                var temp = tapeBig;
                 tapeBig = tapeResult;
                 tapeResult = tapeSmall;
                 tapeSmall = temp;
@@ -277,9 +298,11 @@ namespace Projekt1
 
             var nop = 1;
             Console.WriteLine($"Number of phases: {phasesCount}");
-            //tapeSmall.DefaultFileSettings();
+            
+            tapeSmall.DefaultFileSettings();
             tapeBig.Flush();
             tapeBig.CloseFile();
+            ShowReadsWritesToDisk();
             return tapeBig;
         }
 
@@ -292,6 +315,12 @@ namespace Projekt1
         private int GetNextFibonacci(int f1, int f2)
         {
             return f1 + f2;
+        }
+
+        private void ShowReadsWritesToDisk()
+        {
+            Console.WriteLine($"Number of writes to a disk: {_tape1.GetWriteCounter() + _tape2.GetWriteCounter() + _tape3.GetWriteCounter()}");
+            Console.WriteLine($"Number of reads from a disk: {_tape1.GetReadCounter() + _tape2.GetReadCounter() + _tape3.GetReadCounter()}");
         }
 
     }
