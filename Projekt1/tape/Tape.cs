@@ -133,6 +133,17 @@ namespace Projekt1.tape
             _emptySeriesCount += 1;
         }
 
+        public bool DecEmptySeriesCount()
+        {
+            if (_emptySeriesCount > 0)
+            {
+                _emptySeriesCount -= 1;
+                return true;
+            }
+
+            return false;
+        }
+
         public void DefaultFileSettings()
         {
             _lastRecord = null;

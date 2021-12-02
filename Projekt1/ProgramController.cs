@@ -13,6 +13,7 @@ namespace Projekt1
         Tape _tape3 = new ("t3.txt");
 
         private int _biggerTape;
+        private int _phasesCount = 0;
         
         /// <summary>
         /// load data from the file to a tape 3
@@ -62,12 +63,11 @@ namespace Projekt1
             var seriesCounter = 0;
 
             Tape tape = _tape1;
-            Record record = null; 
+            Record record = null;
             Record prevRecord;
             var tapeChooser = 0;
             bool newSeries = false;
-            bool contSeries = false;
-            
+
             bool merge = false;
             var toMergeRecord = "";
             
@@ -146,14 +146,13 @@ namespace Projekt1
             }
             
             _tape1.Flush();
-            _tape1.CloseFile();
+            //_tape1.CloseFile();
             _tape2.Flush();
-            _tape2.CloseFile();
+            //_tape2.CloseFile();
             
             Console.WriteLine($"Number of writes to a disk: {_tape1.GetWriteCounter() + _tape2.GetWriteCounter() + _tape3.GetWriteCounter()}");
             Console.WriteLine($"Number of reads from a disk: {_tape1.GetReadCounter() + _tape2.GetReadCounter() + _tape3.GetReadCounter()}");
             _tape3.DefaultFileSettings();
-            
         }
         
         public Tape PolyphaseMergeSort()
@@ -194,14 +193,21 @@ namespace Projekt1
             bool endSmall;
             
             // here later add which tape is which now its hard coded
-            
+
+            var phasesCount = 0;
             
             // if small tape is empty then file is sorted
             while (tapeSmall.CanRead() || recordSmall != null)
             {
+                phasesCount++;
                 var mergedSeries = 0;
                 while (true)
                 {
+                    if (!endBig && tapeBig.DecEmptySeriesCount()) {
+                        endBig = true;
+                    }
+                    
+                    
                     if (wroteRecBig)
                     {
                         prevBig = recordBig;
@@ -256,6 +262,7 @@ namespace Projekt1
                         wroteRecSmall = true;
                     }
                 }
+                tapeSmall.DefaultFileSettings();
 
                 Tape temp = tapeBig;
                 tapeBig = tapeResult;
@@ -267,8 +274,12 @@ namespace Projekt1
                 wroteRecBig = true;
 
             }
-            
-            
+
+            var nop = 1;
+            Console.WriteLine($"Number of phases: {phasesCount}");
+            //tapeSmall.DefaultFileSettings();
+            tapeBig.Flush();
+            tapeBig.CloseFile();
             return tapeBig;
         }
 
