@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Specialized;
 using System.IO;
 using System.Text;
 using Projekt1.data;
@@ -51,6 +52,7 @@ namespace Projekt1
             }
             
             _tape3.Flush();
+            //_tape3.CloseFile();
         }
 
         public void SplitBetweenTapes()
@@ -93,7 +95,7 @@ namespace Projekt1
                     continue;
                 }
 
-                if (record != null && prevRecord != null && record.LexicographicOrder(prevRecord) < 0)
+                if (record != null && prevRecord != null && record.LexicographicOrder(prevRecord) < 0 && !newSeries) // TODO tu cos jest skopane nie wiem juz serio
                 {
                     seriesCounter++;
                     newSeries = true;
@@ -179,7 +181,7 @@ namespace Projekt1
             Record recordSmall = null;
             Record prevBig = null;
             Record prevSmall = null;
-            Record rec;
+            Record rec = null;
 
             bool wroteRecBig = true;
             bool wroteRecSmall = true;
@@ -194,10 +196,10 @@ namespace Projekt1
             var phasesCount = 0;
             
             // if small tape is empty then file is sorted
-            while (tapeSmall.CanRead() || recordSmall != null)
+            while (tapeSmall.CanRead() || recordSmall != null || tapeBig.GetSeriesCount() != 1)
             {
                 phasesCount++;
-                var mergedSeries = 0;
+                //var mergedSeries = 0;
                 while (true)
                 {
                     if (!endBig && tapeBig.DecEmptySeriesCount()) {
@@ -245,17 +247,16 @@ namespace Projekt1
                     endBig = endBig || recordBig == null || (prevBig != null && prevBig.LexicographicOrder(recordBig) > 0);
                     endSmall = recordSmall == null || (prevSmall != null && prevSmall.LexicographicOrder(recordSmall) > 0);
                     
-                    if (endBig && endSmall)
+                    if (endBig && endSmall)// mergowanie jest spierdolone
                     {
                         prevBig = null;
                         prevSmall = null;
                         endBig = false;
-                        mergedSeries += 1;
-
+                        //mergedSeries += 1;
+                        
                         if (!tapeSmall.CanRead() && recordSmall == null)
                         {
                             tapeResult.Flush();
-                            Console.WriteLine($"Number of merged series: {mergedSeries}");
                             break;
                         }
                         continue;
@@ -284,6 +285,7 @@ namespace Projekt1
                     }
                 }
                 tapeSmall.DefaultFileSettings();
+                tapeSmall.DecSeriesCount();
 
                 var temp = tapeBig;
                 tapeBig = tapeResult;
@@ -300,6 +302,11 @@ namespace Projekt1
             Console.WriteLine($"Number of phases: {phasesCount}");
             
             tapeSmall.DefaultFileSettings();
+            tapeResult.Flush();
+            tapeResult.CloseFile();
+            tapeSmall.Flush();
+            tapeSmall.CloseFile();
+            
             tapeBig.Flush();
             tapeBig.CloseFile();
             ShowReadsWritesToDisk();

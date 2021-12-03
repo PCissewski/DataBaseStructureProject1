@@ -144,11 +144,21 @@ namespace Projekt1.tape
             return false;
         }
 
+        public void SetPosition(int pos)
+        {
+            _fs.Position = pos;
+        }
+
+        public void DecSeriesCount()
+        {
+            _seriesCount--;
+        }
+        
         public void DefaultFileSettings()
         {
             _lastRecord = null;
             _pageBuffer.ClearBuffer();
-            _seriesCount = 0;
+            //_seriesCount = 0;
             _emptySeriesCount = 0;
             _fs.SetLength(0);
             _fs.Close();
