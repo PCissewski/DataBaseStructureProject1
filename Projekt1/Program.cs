@@ -11,7 +11,7 @@ namespace Projekt1
         {
             var app = new ProgramController();
             var gen = new Generator();
-            app.Run(gen.GenerateTestFile(5000,args));
+            app.Run(gen.GenerateTestFile(10000,args));
         }
 
     }

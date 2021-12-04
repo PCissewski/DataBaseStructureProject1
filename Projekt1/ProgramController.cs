@@ -188,6 +188,10 @@ namespace Projekt1
 
             while (tapeSmall.CanRead() || recordSmall != null || tapeBig.GetSeriesCount() != 1)
             {
+                if (_phasesCount == 35)
+                {
+                    break;
+                }
                 _phasesCount++;
                 //var mergedSeries = 0;
                 // merge series
