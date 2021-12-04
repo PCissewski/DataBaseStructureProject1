@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using Projekt1.data;
+using Projekt1.record;
 using Projekt1.page;
 
 namespace Projekt1.tape

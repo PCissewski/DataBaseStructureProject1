@@ -1,5 +1,5 @@
 ﻿using System;
-using Projekt1.data;
+using Projekt1.record;
 
 namespace Projekt1.page
 {
@@ -9,21 +9,13 @@ namespace Projekt1.page
         private static int _pageSize = 100;
         private int _currentSize;
         private int _position;
-
         private byte[] _pageBuffer;
-        private byte[] _nextPage;
-        
+
         public Page()
         {
             _currentSize = 0;
             _position = 0;
             _pageBuffer = new byte[_pageSize];
-            _nextPage = new byte[25];
-        }
-
-        public void SetPageSize(int size)
-        {
-            _pageSize = size;
         }
 
         public void SetCurrentSize(int size)
@@ -36,16 +28,15 @@ namespace Projekt1.page
         /// </summary>
         /// <param name="rec">record to insert</param>
         /// <returns>0 on success and -1 when there is no space in buffer</returns>
-        public int InsertRecord(Record rec)
+        public void InsertRecord(Record rec)
         {
             if (rec.GetRecordSize() + _currentSize > _pageSize)
             {
-                return -1;
+                return;
             }
             // copy record and the end of currently used buffer
             Array.Copy(rec.GetSaveValue(), 0, _pageBuffer, _currentSize, rec.GetSavedRecordSize());
             _currentSize += rec.GetSavedRecordSize();
-            return 0;
         }
 
         public byte[] GetBuffer()
@@ -102,7 +93,7 @@ namespace Projekt1.page
         {
             return _currentSize == _position;
         }
-        // TODO Fix this 
+        
         public static int GetPageSize()
         {
             return _pageSize;

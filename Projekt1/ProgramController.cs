@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Specialized;
 using System.IO;
 using System.Text;
-using Projekt1.data;
+using Projekt1.record;
 using Projekt1.tape;
 
 namespace Projekt1
@@ -179,23 +178,19 @@ namespace Projekt1
       
             Record recordBig = null;
             Record recordSmall = null;
-            Record prevBig = null;
-            Record prevSmall = null;
+            Record prevRecordBig = null;
+            Record prevRecordSmall = null;
             Record rec = null;
 
-            bool wroteRecBig = true;
+            bool wroteRecordToBig = true;
             bool wroteRecSmall = true;
             bool endBig = false;
             bool endSmall;
             bool merge = false;
             bool smallMerge = false;
             var toMergeRecord = "";
-            
-            // here later add which tape is which now its hard coded
-
             var phasesCount = 0;
             
-            // if small tape is empty then file is sorted
             while (tapeSmall.CanRead() || recordSmall != null || tapeBig.GetSeriesCount() != 1)
             {
                 phasesCount++;
@@ -206,9 +201,9 @@ namespace Projekt1
                         endBig = true;
                     }
 
-                    if (wroteRecBig)
+                    if (wroteRecordToBig)
                     {
-                        prevBig = recordBig;
+                        prevRecordBig = recordBig;
                         recordBig = tapeBig.GetRecord();
                         if (merge)
                         {
@@ -222,12 +217,12 @@ namespace Projekt1
                             merge = true;
                             continue;
                         }
-                        wroteRecBig = false;
+                        wroteRecordToBig = false;
                     }
 
                     if (wroteRecSmall)
                     {
-                        prevSmall = recordSmall;
+                        prevRecordSmall = recordSmall;
                         recordSmall = tapeSmall.GetRecord();
                         if (merge)
                         {
@@ -244,13 +239,30 @@ namespace Projekt1
                         wroteRecSmall = false;
                     }
 
-                    endBig = endBig || recordBig == null || (prevBig != null && prevBig.LexicographicOrder(recordBig) > 0);
-                    endSmall = recordSmall == null || (prevSmall != null && prevSmall.LexicographicOrder(recordSmall) > 0);
-                    
-                    if (endBig && endSmall)// mergowanie jest spierdolone
+                    if (endBig || recordBig == null ||
+                        (prevRecordBig != null && prevRecordBig.LexicographicOrder(recordBig) > 0))
                     {
-                        prevBig = null;
-                        prevSmall = null;
+                        endBig = true;
+                    }
+                    else
+                    {
+                        endBig = false;
+                    }
+
+                    if (recordSmall == null ||
+                        (prevRecordSmall != null && prevRecordSmall.LexicographicOrder(recordSmall) > 0))
+                    {
+                        endSmall = true;
+                    }
+                    else
+                    {
+                        endSmall = false;
+                    }
+
+                    if (endBig && endSmall)
+                    {
+                        prevRecordBig = null;
+                        prevRecordSmall = null;
                         endBig = false;
                         //mergedSeries += 1;
                         
@@ -277,7 +289,7 @@ namespace Projekt1
                     tapeResult.AddRecord(rec);
                     if (rec == recordBig)
                     {
-                        wroteRecBig = true;
+                        wroteRecordToBig = true;
                     }
                     else
                     {
@@ -294,11 +306,10 @@ namespace Projekt1
 
                 recordSmall = recordBig;
                 recordBig = null;
-                wroteRecBig = true;
+                wroteRecordToBig = true;
 
             }
-
-            var nop = 1;
+            
             Console.WriteLine($"Number of phases: {phasesCount}");
             
             tapeSmall.DefaultFileSettings();

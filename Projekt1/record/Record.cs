@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Linq;
 using System.Text;
 
-namespace Projekt1.data
+namespace Projekt1.record
 {
     public class Record
     {
