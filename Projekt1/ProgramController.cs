@@ -51,10 +51,9 @@ namespace Projekt1
             }
             
             _tape3.Flush();
-            //_tape3.CloseFile();
         }
 
-        public void SplitBetweenTapes()
+        private void SplitBetweenTapes()
         {
             int fib = 1, fib1 = 0, fib2 = 0;
             _tape1.SetSeriesCount(0);
@@ -94,7 +93,7 @@ namespace Projekt1
                     continue;
                 }
 
-                if (record != null && prevRecord != null && record.LexicographicOrder(prevRecord) < 0 && !newSeries) // TODO tu cos jest skopane nie wiem juz serio
+                if (record != null && prevRecord != null && record.LexicographicOrder(prevRecord) < 0 && !newSeries)
                 {
                     seriesCounter++;
                     newSeries = true;
@@ -147,15 +146,12 @@ namespace Projekt1
             }
             
             _tape1.Flush();
-            //_tape1.CloseFile();
             _tape2.Flush();
-            //_tape2.CloseFile();
-            
-            ShowReadsWritesToDisk();
+
             _tape3.DefaultFileSettings();
         }
         
-        public Tape PolyphaseMergeSort()
+        private Tape PolyphaseMergeSort()
         {
             Tape tapeBig;
             Tape tapeSmall;
@@ -189,12 +185,12 @@ namespace Projekt1
             bool merge = false;
             bool smallMerge = false;
             var toMergeRecord = "";
-            var phasesCount = 0;
-            
+
             while (tapeSmall.CanRead() || recordSmall != null || tapeBig.GetSeriesCount() != 1)
             {
-                phasesCount++;
+                _phasesCount++;
                 //var mergedSeries = 0;
+                // merge series
                 while (true)
                 {
                     if (!endBig && tapeBig.DecEmptySeriesCount()) {
@@ -258,7 +254,7 @@ namespace Projekt1
                     {
                         endSmall = false;
                     }
-
+                    
                     if (endBig && endSmall)
                     {
                         prevRecordBig = null;
@@ -310,7 +306,7 @@ namespace Projekt1
 
             }
             
-            Console.WriteLine($"Number of phases: {phasesCount}");
+            Console.WriteLine($"Number of phases: {_phasesCount}");
             
             tapeSmall.DefaultFileSettings();
             tapeResult.Flush();
@@ -324,12 +320,19 @@ namespace Projekt1
             return tapeBig;
         }
 
-        public void Sort()
+        private void Sort()
         {
             SplitBetweenTapes();
             Tape tape = PolyphaseMergeSort();
+            tape.MakeReadable();
         }
-        
+
+        public void Run(string path)
+        {
+            LoadData(path);
+            Sort();
+        }
+
         private int GetNextFibonacci(int f1, int f2)
         {
             return f1 + f2;

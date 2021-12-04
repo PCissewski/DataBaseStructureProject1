@@ -1,5 +1,6 @@
 using System;
 using Projekt1;
+using Projekt1.generator;
 
 namespace Projekt1
 {
@@ -9,11 +10,8 @@ namespace Projekt1
         static void Main(string[] args)
         {
             var app = new ProgramController();
-
-            app.LoadData(args[3]);
-            //app.Sort();
-            app.SplitBetweenTapes();
-            app.PolyphaseMergeSort();
+            var gen = new Generator();
+            app.Run(gen.GenerateTestFile(5000,args));
         }
 
     }

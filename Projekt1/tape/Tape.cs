@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 using Projekt1.record;
 using Projekt1.page;
 
@@ -56,7 +57,24 @@ namespace Projekt1.tape
         {
             _fs = File.Open(_fileName, FileMode.Open);
         }
-
+        /// <summary>
+        /// Makes the output file readable
+        /// </summary>
+        public void MakeReadable()
+        {
+            OpenFile();
+            var bt = new byte[_fs.Length];
+            var count = _fs.Length;
+            var value = (int) count;
+            var times = _fs.Read(bt, 0, value);
+            var str = Encoding.ASCII.GetString(bt);
+            var newStr = str.Replace(';', '\n');
+            var newBt = Encoding.ASCII.GetBytes(newStr);
+            _fs.SetLength(0);
+            _fs.Write(newBt,0,value);
+            _fs.Close();
+        }
+        
         public void CloseFile()
         {
             try
