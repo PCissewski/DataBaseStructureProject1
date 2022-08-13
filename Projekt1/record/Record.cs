@@ -14,6 +14,11 @@ namespace Projekt1.record
         {
             _person = person;
         }
+
+        public string GetRecord()
+        {
+            return _person;
+        }
         
         public static String GetSavedValue(byte[] save)
         {

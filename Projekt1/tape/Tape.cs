@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Text;
+﻿using System.Text;
 using Projekt1.record;
 using Projekt1.page;
 
@@ -11,21 +9,22 @@ namespace Projekt1.tape
         private Page _pageBuffer;
         private byte[] _buffer;
         private Record _lastRecord;
-        private Stream _fs = null;
-        private string _fileName;
-        private int _writeCounter = 0;
-        private int _readCounter = 0;
+        private Stream _fs;
+        private readonly string _tapeName;
+        private int _writeCounter;
+        private int _readCounter;
         
         private int _seriesCount;
         private int _emptySeriesCount;
+
+        private List<Record> records = new ();
         
-        public Tape(string name)
+        public Tape(string tapeName)
         {
-            _fileName = name;
-            _fs = File.Open(name, FileMode.Open, FileAccess.ReadWrite);
+            _tapeName = tapeName;
+            _fs = File.Open(tapeName, FileMode.Open, FileAccess.ReadWrite);
             _pageBuffer = new Page();
             _buffer = _pageBuffer.GetBuffer();
-            _lastRecord = null;
         }
 
         public void AddRecord(Record record)
@@ -36,8 +35,18 @@ namespace Projekt1.tape
                 FlushBufferPage();
             }
             _pageBuffer.InsertRecord(record);
+            records.Add(record);
         }
 
+        public void PrintRecords()
+        {
+            foreach (var record in records)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine(record.GetRecord());
+                Console.ResetColor();
+            }
+        }
         public Record GetRecord()
         {
             if (_pageBuffer.IsEmpty())
@@ -55,11 +64,8 @@ namespace Projekt1.tape
 
         public void OpenFile()
         {
-            _fs = File.Open(_fileName, FileMode.Open);
+            _fs = File.Open(_tapeName, FileMode.Open);
         }
-        /// <summary>
-        /// Makes the output file readable
-        /// </summary>
         public void MakeReadable()
         {
             OpenFile();
@@ -87,11 +93,6 @@ namespace Projekt1.tape
                 throw;
             }
         }
-        /// <summary>
-        /// Close file to see that something appeared in text file
-        /// Note: CloseFile is only to see content of file after Write
-        ///       Keep open for the duration of the alg.
-        /// </summary>
         public void Flush()
         {
             FlushBufferPage();
@@ -99,12 +100,6 @@ namespace Projekt1.tape
             _fs.Position = 0;
             //CloseFile();
         }
-        
-        /// <summary>
-        /// Save buffer content into the file
-        /// write counter
-        /// </summary>
-        /// <returns>return 0 on success</returns>
         private void FlushBufferPage()
         {
             _writeCounter += 1;
@@ -112,12 +107,6 @@ namespace Projekt1.tape
             
             _pageBuffer.ClearBuffer();
         }
-        
-        /// <summary>
-        /// Fill buffer with data to read
-        /// read counter
-        /// </summary>
-        /// TODO Fix this, count gives fake information, now its hard coded
         private void FillBuffer()
         {
             _readCounter += 1;
@@ -135,7 +124,6 @@ namespace Projekt1.tape
 
             return false;
         }
-
         public void SetSeriesCount(int seriesCount)
         {
             _seriesCount = seriesCount;
@@ -151,6 +139,11 @@ namespace Projekt1.tape
             _emptySeriesCount += 1;
         }
 
+        public int GetEmptySeriesCount()
+        {
+            return _emptySeriesCount;
+        }
+
         public bool DecEmptySeriesCount()
         {
             if (_emptySeriesCount > 0)
@@ -160,11 +153,6 @@ namespace Projekt1.tape
             }
 
             return false;
-        }
-
-        public void SetPosition(int pos)
-        {
-            _fs.Position = pos;
         }
 
         public void DecSeriesCount()
@@ -180,7 +168,8 @@ namespace Projekt1.tape
             _emptySeriesCount = 0;
             _fs.SetLength(0);
             _fs.Close();
-            _fs = File.Open(_fileName, FileMode.Open);
+            _fs = File.Open(_tapeName, FileMode.Open);
+            records.Clear();
         }
 
         public int GetWriteCounter()

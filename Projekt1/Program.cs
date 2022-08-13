@@ -1,5 +1,3 @@
-using System;
-using Projekt1;
 using Projekt1.generator;
 
 namespace Projekt1
@@ -9,9 +7,9 @@ namespace Projekt1
     {
         static void Main(string[] args)
         {
-            var app = new ProgramController();
-            var gen = new Generator();
-            app.Run(gen.GenerateTestFile(10000,args));
+            var app = new ProgramController(new ConsoleWriter());
+            var gen = new Generator(args);
+            app.Run(gen.GenerateTestFile(15));
         }
 
     }

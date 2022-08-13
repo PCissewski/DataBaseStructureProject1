@@ -1,5 +1,4 @@
-﻿using System;
-using Projekt1.record;
+﻿using Projekt1.record;
 
 namespace Projekt1.page
 {
@@ -9,7 +8,7 @@ namespace Projekt1.page
         private static int _pageSize = 100;
         private int _currentSize;
         private int _position;
-        private byte[] _pageBuffer;
+        private readonly byte[] _pageBuffer;
 
         public Page()
         {
@@ -22,12 +21,7 @@ namespace Projekt1.page
         {
             _currentSize = size;
         }
-        
-        /// <summary>
-        /// Insert one record
-        /// </summary>
-        /// <param name="rec">record to insert</param>
-        /// <returns>0 on success and -1 when there is no space in buffer</returns>
+
         public void InsertRecord(Record rec)
         {
             if (rec.GetRecordSize() + _currentSize > _pageSize)
