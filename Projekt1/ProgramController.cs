@@ -1,16 +1,13 @@
-﻿using System;
-using System.IO;
-using System.Text;
-using Projekt1.record;
+﻿using Projekt1.record;
 using Projekt1.tape;
 
 namespace Projekt1
 {
     public class ProgramController
     {
-        Tape _tape1 = new ("t1.txt");
-        Tape _tape2 = new ("t2.txt");
-        Tape _tape3 = new ("t3.txt");
+        private readonly Tape _tape1 = new ("t1.txt");
+        private readonly Tape _tape2 = new ("t2.txt");
+        private readonly Tape _tape3 = new ("t3.txt");
 
         private int _biggerTape;
         private int _phasesCount;
@@ -20,53 +17,15 @@ namespace Projekt1
         {
             _consoleWriter = consoleWriter;
         }
-        
-        private void LoadData(string testFile)
-        {
-            FileStream fs = File.Open(testFile, FileMode.Open);
-            var offset = 0;
-            _tape3.DefaultFileSettings();
-            while (true)
-            {
-                var buffer = new byte[50];
-                var eof = fs.Read(buffer, offset, 20);
-                if (eof == 0)
-                {
-                    break;
-                }
-                var temp= Encoding.ASCII.GetString(buffer);
-                if (temp.Contains("\r\n") || temp.Contains("\n") || temp.Contains("\r"))
-                {
-                    var record = temp.Split("\r");
-                    var trimmedString = record[1].TrimEnd('\0');
-                    
-                    var cont = Encoding.ASCII.GetByteCount(trimmedString);
-                    var setBack = cont - 1;
-                    fs.Position -= setBack;
-                    offset = -10;
-                    
-                    _tape3.AddRecord(new Record(record[0]));
-                }
-
-                offset += 10;
-
-            }
-            
-            _tape3.Flush();
-        }
 
         private void SplitBetweenTapes()
         {
             int fib = 1, fib1 = 0, fib2 = 0;
-            _tape1.SetSeriesCount(0);
-            _tape2.SetSeriesCount(0);
-            _tape1.DefaultFileSettings();
-            _tape2.DefaultFileSettings();
             var seriesCounter = 0;
 
-            Tape tape = _tape1;
+            var tape = _tape1;
+            
             Record record = null;
-            Record prevRecord;
             var tapeChooser = 0;
             bool newSeries = false;
             bool continueSeries = false;
@@ -76,27 +35,29 @@ namespace Projekt1
             
             while (_tape3.CanRead() || record != null)
             {
-                prevRecord = tape.GetLastRecord();
+                var prevRecord = tape.GetLastRecord();
 
                 if (!newSeries)
                 {
                     record = _tape3.GetRecord();
+                    
                     if (merge)
                     {
                         record.SetValue(toMergeRecord);
                         merge = false;
                     }
                 
-                    if (record != null && !record.GetValue().Contains(';'))
+                    if (!record.GetValue().Contains(';'))
                     {
                         toMergeRecord = record.GetValue();
                         merge = true;
                         continue;
                     }
+                    
                 }
-                else if (prevRecord != null)
+                else if (prevRecord != null && continueSeries)
                 {
-                    continueSeries = record is not null;
+                    continueSeries = record is not null ;
                 }
 
                 if (record != null && prevRecord != null && record.LexicographicOrder(prevRecord) < 0 && !newSeries)
@@ -123,16 +84,13 @@ namespace Projekt1
                         continue;
                     }
 
-                    
                 }
 
-                if (record != null)
-                {
-                    tape.AddRecord(record);
-                    newSeries = false;
-                    record = null;
-                }
-                
+                if (record == null) continue;
+                tape.AddRecord(record);
+                newSeries = false;
+                record = null;
+
             }
             if(!continueSeries)
                 seriesCounter++;
@@ -148,7 +106,7 @@ namespace Projekt1
                         tape = (tapeChooser == 0) ? _tape1 : _tape2;
                         break;
                     }
-                    tape.EmptySeriesCount();
+                    tape.IncreaseEmptySeriesCount();
                     seriesCounter++;
                 }
             }
@@ -157,6 +115,9 @@ namespace Projekt1
             
             _tape1.Flush();
             _tape2.Flush();
+            
+            _consoleWriter.ShowTapeContent(_tape1);
+            _consoleWriter.ShowTapeContent(_tape2);
 
             _tape3.DefaultFileSettings();
         }
@@ -167,26 +128,25 @@ namespace Projekt1
             Tape tapeSmall;
             var tapeResult = _tape3;
 
-            if (_biggerTape == 1)
+            switch (_biggerTape)
             {
-                tapeBig = _tape2;
-                tapeSmall = _tape1;
-            }
-            else if (_biggerTape == 0)
-            {
-                tapeBig = _tape1;
-                tapeSmall = _tape2;
-            }
-            else
-            {
-                return null;
+                case 1:
+                    tapeBig = _tape2;
+                    tapeSmall = _tape1;
+                    break;
+                case 0:
+                    tapeBig = _tape1;
+                    tapeSmall = _tape2;
+                    break;
+                default:
+                    return new Tape("failTape.txt");
             }
       
             Record recordBig = null;
             Record recordSmall = null;
             Record prevRecordBig = null;
             Record prevRecordSmall = null;
-            Record rec = null;
+            Record rec;
 
             bool wroteRecordToBig = true;
             bool wroteRecSmall = true;
@@ -197,16 +157,16 @@ namespace Projekt1
             var toMergeRecord = "";
             
 
-            while (tapeSmall.CanRead() || recordSmall != null || tapeBig.GetSeriesCount() != 1)
+            while (tapeSmall.CanRead())
             {
                 
                 var mergedSeries = 0;
-                _consoleWriter.WriteTapesContent(_phasesCount, tapeBig, tapeSmall, tapeResult);
+                _consoleWriter.ShowTapesContent(_phasesCount, tapeBig, tapeSmall, tapeResult);
                 _phasesCount++;
                 // merge series
                 while (true)
                 {
-                    if (!endBig && tapeBig.DecEmptySeriesCount()) {
+                    if (!endBig && tapeBig.DecreaseEmptySeriesCount()) {
                         endBig = true;
                     }
 
@@ -280,7 +240,7 @@ namespace Projekt1
                         {
                             tapeResult.Flush();
                             Console.WriteLine($"Merged series: {mergedSeries}");
-                            _consoleWriter.WriteResultTapeContent(tapeResult);
+                            _consoleWriter.ShowTapeContent(tapeResult);
                             break;
                         }
                         continue;
@@ -309,7 +269,7 @@ namespace Projekt1
                     }
                 }
                 tapeSmall.DefaultFileSettings();
-                tapeSmall.DecSeriesCount();
+                tapeSmall.DecreaseSeriesCount();
 
                 var temp = tapeBig;
                 tapeBig = tapeResult;
@@ -319,7 +279,6 @@ namespace Projekt1
                 recordSmall = recordBig;
                 recordBig = null;
                 wroteRecordToBig = true;
-
             }
             
             Console.WriteLine($"Number of phases: {_phasesCount}");
@@ -339,13 +298,13 @@ namespace Projekt1
         private void Sort()
         {
             SplitBetweenTapes();
-            //var sortedTape = PolyPhaseMergeSort();
-            //sortedTape.MakeReadable();
+            // var sortedTape = PolyPhaseMergeSort();
+            // sortedTape.MakeReadable();
         }
 
-        public void Run(string testFile)
+        public void Run(string outputFile)
         {
-            LoadData(testFile);
+            DataLoader.LoadData(_tape3, outputFile);
             Sort();
         }
 

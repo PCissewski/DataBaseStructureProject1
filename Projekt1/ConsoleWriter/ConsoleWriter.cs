@@ -4,7 +4,7 @@ namespace Projekt1;
 
 public class ConsoleWriter : IConsoleWriter
 {
-    public void WriteTapesContent(int phaseCount, Tape big, Tape small, Tape result)
+    public void ShowTapesContent(int phaseCount, Tape big, Tape small, Tape result)
     {
         Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine($"Phase number {phaseCount}\n");
@@ -21,11 +21,11 @@ public class ConsoleWriter : IConsoleWriter
         Console.WriteLine("----------------------------------");
     }
 
-    public void WriteResultTapeContent(Tape result)
+    public void ShowTapeContent(Tape tape)
     {
-        Console.WriteLine("\nTape Result:");
-        Console.WriteLine($"Current number of series: {result.GetSeriesCount()} (includes {result.GetEmptySeriesCount()} empty series)");
-        result.PrintRecords();
+        Console.WriteLine("\nTape content:");
+        Console.WriteLine($"Current number of series: {tape.GetSeriesCount()} (includes {tape.GetEmptySeriesCount()} empty series)");
+        tape.PrintRecords();
         Console.WriteLine("----------------------------------");
     }
 

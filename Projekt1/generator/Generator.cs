@@ -5,9 +5,11 @@
         private readonly string _testFile;
         private readonly string _names;
         private readonly string _surnames;
+        private readonly ILogger _logger;
 
-        public Generator(string[] inputFiles)
+        public Generator(string[] inputFiles, ILogger logger)
         {
+            _logger = logger;
             _names = inputFiles[1];
             _surnames = inputFiles[2];
             _testFile = inputFiles[4];
@@ -45,6 +47,7 @@
                 recordsNumber--;
             }
             sw.Close();
+            _logger.SaveInputTapeContent(_testFile);
             return _testFile;
         }
     }

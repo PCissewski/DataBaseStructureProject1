@@ -5,7 +5,7 @@ namespace Projekt1.page
     
     public class Page
     {
-        private static int _pageSize = 100;
+        private const int PageSize = 100;
         private int _currentSize;
         private int _position;
         private readonly byte[] _pageBuffer;
@@ -14,7 +14,7 @@ namespace Projekt1.page
         {
             _currentSize = 0;
             _position = 0;
-            _pageBuffer = new byte[_pageSize];
+            _pageBuffer = new byte[PageSize];
         }
 
         public void SetCurrentSize(int size)
@@ -24,7 +24,7 @@ namespace Projekt1.page
 
         public void InsertRecord(Record rec)
         {
-            if (rec.GetRecordSize() + _currentSize > _pageSize)
+            if (rec.GetRecordSize() + _currentSize > PageSize)
             {
                 return;
             }
@@ -50,7 +50,7 @@ namespace Projekt1.page
             {
                 var semiColon = _pageBuffer[_position + i];
                 counter += 1;
-                if (semiColon == 59 || _position + i + 1 == _pageSize)
+                if (semiColon == 59 || _position + i + 1 == PageSize)
                 {
                     break;
                 }
@@ -80,7 +80,7 @@ namespace Projekt1.page
 
         public bool IsFull(Record record)
         {
-            return _currentSize > _pageSize - record.GetSavedRecordSize();
+            return _currentSize > PageSize - record.GetSavedRecordSize();
         }
 
         public bool IsEmpty()
@@ -90,7 +90,7 @@ namespace Projekt1.page
         
         public static int GetPageSize()
         {
-            return _pageSize;
+            return PageSize;
         }
         
     }

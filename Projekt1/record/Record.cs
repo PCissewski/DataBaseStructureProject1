@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 
 namespace Projekt1.record
 {
@@ -65,7 +64,7 @@ namespace Projekt1.record
             var person1 = GetValue();
             var person2 = t.GetValue();
 
-            return string.Compare(person1, person2);
+            return string.CompareOrdinal(person1, person2);
         }
     }
 }

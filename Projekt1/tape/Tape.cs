@@ -6,11 +6,17 @@ namespace Projekt1.tape
 {
     public class Tape
     {
-        private Page _pageBuffer;
-        private byte[] _buffer;
+        private readonly string _tapeName;
+        public string TapeName => _tapeName;
+        
+        private const string OutputFile =
+            "X:\\Studia\\InformatykaSemestr5\\SBD\\Project1\\Projekt1\\Projekt1\\OutputFile\\outputFile.txt";
+        
+        private readonly Page _pageBuffer;
+        private readonly byte[] _buffer;
         private Record _lastRecord;
         private Stream _fs;
-        private readonly string _tapeName;
+        
         private int _writeCounter;
         private int _readCounter;
         
@@ -25,6 +31,8 @@ namespace Projekt1.tape
             _fs = File.Open(tapeName, FileMode.Open, FileAccess.ReadWrite);
             _pageBuffer = new Page();
             _buffer = _pageBuffer.GetBuffer();
+            _seriesCount = 0;
+            DefaultFileSettings();
         }
 
         public void AddRecord(Record record)
@@ -62,7 +70,7 @@ namespace Projekt1.tape
             return _lastRecord;
         }
 
-        public void OpenFile()
+        private void OpenFile()
         {
             _fs = File.Open(_tapeName, FileMode.Open);
         }
@@ -78,6 +86,10 @@ namespace Projekt1.tape
             var newBt = Encoding.ASCII.GetBytes(newStr);
             _fs.SetLength(0);
             _fs.Write(newBt,0,value);
+            _fs.Close();
+            
+            _fs = File.Open(OutputFile, FileMode.Open);
+            _fs.Write(newBt, 0, value);
             _fs.Close();
         }
         
@@ -98,7 +110,6 @@ namespace Projekt1.tape
             FlushBufferPage();
             _fs.Flush();
             _fs.Position = 0;
-            //CloseFile();
         }
         private void FlushBufferPage()
         {
@@ -134,7 +145,7 @@ namespace Projekt1.tape
             return _seriesCount;
         }
 
-        public void EmptySeriesCount()
+        public void IncreaseEmptySeriesCount()
         {
             _emptySeriesCount += 1;
         }
@@ -144,7 +155,7 @@ namespace Projekt1.tape
             return _emptySeriesCount;
         }
 
-        public bool DecEmptySeriesCount()
+        public bool DecreaseEmptySeriesCount()
         {
             if (_emptySeriesCount > 0)
             {
@@ -155,7 +166,7 @@ namespace Projekt1.tape
             return false;
         }
 
-        public void DecSeriesCount()
+        public void DecreaseSeriesCount()
         {
             _seriesCount--;
         }
@@ -164,7 +175,6 @@ namespace Projekt1.tape
         {
             _lastRecord = null;
             _pageBuffer.ClearBuffer();
-            //_seriesCount = 0;
             _emptySeriesCount = 0;
             _fs.SetLength(0);
             _fs.Close();
