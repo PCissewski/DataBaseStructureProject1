@@ -43,7 +43,7 @@ namespace Projekt1.record
             return 1 + Encoding.ASCII.GetByteCount(_person);
         }
 
-        public String GetValue()
+        public string GetValue()
         {
             return _person;
         }

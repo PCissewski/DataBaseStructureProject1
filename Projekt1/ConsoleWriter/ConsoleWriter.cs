@@ -23,7 +23,7 @@ public class ConsoleWriter : IConsoleWriter
 
     public void ShowTapeContent(Tape tape)
     {
-        Console.WriteLine("\nTape content:");
+        Console.WriteLine($"\n{tape.TapeName} content:");
         Console.WriteLine($"Current number of series: {tape.GetSeriesCount()} (includes {tape.GetEmptySeriesCount()} empty series)");
         tape.PrintRecords();
         Console.WriteLine("----------------------------------");

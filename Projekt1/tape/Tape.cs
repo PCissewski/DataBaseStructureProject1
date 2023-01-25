@@ -128,12 +128,7 @@ namespace Projekt1.tape
 
         public bool CanRead()
         {
-            if (!_pageBuffer.IsEmpty() || _fs.Length - _fs.Position > 0)
-            {
-                return true;
-            }
-
-            return false;
+            return !_pageBuffer.IsEmpty() || _fs.Length - _fs.Position > 0;
         }
         public void SetSeriesCount(int seriesCount)
         {

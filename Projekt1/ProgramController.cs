@@ -26,21 +26,25 @@ namespace Projekt1
             var tape = _tape1;
             
             Record record = null;
+            
             var tapeChooser = 0;
-            bool newSeries = false;
-            bool continueSeries = false;
+            var newSeries = false;
+            var continueSeries = false;
+            var recentlyChangedTape = false;
 
-            bool merge = false;
+            var merge = false;
             var toMergeRecord = "";
             
             while (_tape3.CanRead() || record != null)
             {
                 var prevRecord = tape.GetLastRecord();
 
+
+
                 if (!newSeries)
                 {
                     record = _tape3.GetRecord();
-                    
+
                     if (merge)
                     {
                         record.SetValue(toMergeRecord);
@@ -62,6 +66,12 @@ namespace Projekt1
 
                 if (record != null && prevRecord != null && record.LexicographicOrder(prevRecord) < 0 && !newSeries)
                 {
+                    if (recentlyChangedTape)
+                    {
+                        recentlyChangedTape = false;
+                        continueSeries = true;
+                    }
+
                     if (continueSeries)
                     {
                         continueSeries = false;
@@ -79,6 +89,7 @@ namespace Projekt1
                             tape.SetSeriesCount(seriesCounter);
                             tapeChooser = (tapeChooser + 1) % 2;
                             tape = (tapeChooser == 0) ? _tape1 : _tape2;
+                            recentlyChangedTape = true;
                             seriesCounter = tape.GetSeriesCount();
                         }
                         continue;
@@ -88,12 +99,13 @@ namespace Projekt1
 
                 if (record == null) continue;
                 tape.AddRecord(record);
+                recentlyChangedTape = false;
                 newSeries = false;
                 record = null;
 
             }
-            if(!continueSeries)
-                seriesCounter++;
+            // if(!continueSeries)
+            //     seriesCounter++;
 
             if (!(continueSeries && fib2 == seriesCounter))
             {
@@ -115,9 +127,10 @@ namespace Projekt1
             
             _tape1.Flush();
             _tape2.Flush();
-            
+
             _consoleWriter.ShowTapeContent(_tape1);
             _consoleWriter.ShowTapeContent(_tape2);
+            _consoleWriter.ShowReadsWritesToDisk(_tape3, _tape2, _tape1);
 
             _tape3.DefaultFileSettings();
         }
@@ -298,8 +311,8 @@ namespace Projekt1
         private void Sort()
         {
             SplitBetweenTapes();
-            // var sortedTape = PolyPhaseMergeSort();
-            // sortedTape.MakeReadable();
+            var sortedTape = PolyPhaseMergeSort();
+            sortedTape.MakeReadable();
         }
 
         public void Run(string outputFile)

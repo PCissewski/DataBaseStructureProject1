@@ -10,8 +10,8 @@ namespace Projekt1
         {
             var app = new ProgramController(new ConsoleWriter());
             var gen = new Generator(args, new Logger());
-            //app.Run(gen.GenerateTestFile(15));
-            app.Run(LoggerFile);
+            app.Run(gen.GenerateTestFile(15));
+            //app.Run(LoggerFile);
         }
 
     }
