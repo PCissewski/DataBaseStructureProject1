@@ -17,16 +17,17 @@
 
         private string SingleRecord()
         {
-            var names = File.ReadAllLines(_names);
-            var surnames = File.ReadAllLines(_surnames);
-
-            return RandomPerson(names, surnames);
+            // var names = File.ReadAllLines(_names);
+            // var surnames = File.ReadAllLines(_surnames);
+            //
+            // return RandomPerson(names, surnames);
+            return RandomTime();
         }
 
         private static string RandomPerson(string[] names, string[] surnames)
         {
             var r = new Random();
-            
+
             var rName = r.Next(0, names.Length);
             var rLastName = r.Next(0, surnames.Length);
             
@@ -34,6 +35,30 @@
             var person = $"{names[rName]} {surnames[rLastName]}\r\n";
             
             return person;
+        }
+
+        private static string RandomTime()
+        {
+            var r = new Random();
+            var hours = r.Next(0,23);
+            var minutes = r.Next(0, 60);
+
+            var hoursStr = hours.ToString();
+            var minutesStr = minutes.ToString();
+
+            if (minutes < 10)
+            {
+                minutesStr = minutes.ToString();
+                minutesStr = $"0{minutesStr}";
+            }
+
+            if (hours < 10)
+            {
+                hoursStr = hours.ToString();
+                hoursStr = $"0{hoursStr}";
+            }
+
+            return $"{hoursStr}:{minutesStr}\r\n";
         }
 
         public string GenerateTestFile(int recordsNumber)

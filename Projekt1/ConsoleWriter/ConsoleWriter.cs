@@ -9,13 +9,13 @@ public class ConsoleWriter : IConsoleWriter
         Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine($"Phase number {phaseCount}\n");
         Console.ResetColor();
-        Console.WriteLine("Tape Big:");
+        Console.WriteLine($"Tape Big: ({big.TapeName})");
         Console.WriteLine($"Current number of series: {big.GetSeriesCount()} (includes {big.GetEmptySeriesCount()} empty series)");
         big.PrintRecords();
-        Console.WriteLine("\nTape Small:");
+        Console.WriteLine($"\nTape Small: ({small.TapeName})");
         Console.WriteLine($"Current number of series: {small.GetSeriesCount()} (includes {small.GetEmptySeriesCount()} empty series)");
         small.PrintRecords();
-        Console.WriteLine("\nTape Result:");
+        Console.WriteLine($"\nTape Result: ({result.TapeName})");
         Console.WriteLine($"Current number of series: {result.GetSeriesCount()} (includes {result.GetEmptySeriesCount()} empty series)");
         result.PrintRecords();
         Console.WriteLine("----------------------------------");

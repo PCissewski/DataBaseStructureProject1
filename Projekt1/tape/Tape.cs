@@ -38,7 +38,7 @@ namespace Projekt1.tape
         public void AddRecord(Record record)
         {
             _lastRecord = record;
-            if (_pageBuffer.IsFull(record))
+            if (_pageBuffer.IsFull())
             {
                 FlushBufferPage();
             }
@@ -122,7 +122,7 @@ namespace Projekt1.tape
         {
             _readCounter += 1;
             _pageBuffer.ClearBuffer();
-            var size = _fs.Read(_buffer, 0, Page.GetPageSize());
+            var size = _fs.Read(_buffer, 0, Page.GetMaxRecordsNumber()*Record.GetRecordSavedSize());
             _pageBuffer.SetCurrentSize(size);
         }
 
@@ -161,16 +161,12 @@ namespace Projekt1.tape
             return false;
         }
 
-        public void DecreaseSeriesCount()
-        {
-            _seriesCount--;
-        }
-        
         public void DefaultFileSettings()
         {
             _lastRecord = null;
             _pageBuffer.ClearBuffer();
             _emptySeriesCount = 0;
+            _seriesCount = 0;
             _fs.SetLength(0);
             _fs.Close();
             _fs = File.Open(_tapeName, FileMode.Open);

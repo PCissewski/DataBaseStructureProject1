@@ -17,6 +17,11 @@ namespace Projekt1.page
             _pageBuffer = new byte[PageSize];
         }
 
+        public static int GetMaxRecordsNumber()
+        {
+            return PageSize / Record.GetRecordSavedSize();
+        }
+
         public void SetCurrentSize(int size)
         {
             _currentSize = size;
@@ -24,13 +29,13 @@ namespace Projekt1.page
 
         public void InsertRecord(Record rec)
         {
-            if (rec.GetRecordSize() + _currentSize > PageSize)
+            if (Record.GetRecordSize() + _currentSize > PageSize)
             {
                 return;
             }
             // copy record and the end of currently used buffer
-            Array.Copy(rec.GetSaveValue(), 0, _pageBuffer, _currentSize, rec.GetSavedRecordSize());
-            _currentSize += rec.GetSavedRecordSize();
+            Array.Copy(rec.GetSaveValue(), 0, _pageBuffer, _currentSize, Record.GetRecordSavedSize());
+            _currentSize += Record.GetRecordSavedSize();
         }
 
         public byte[] GetBuffer()
@@ -55,7 +60,6 @@ namespace Projekt1.page
                     break;
                 }
                 
-
                 i += 1;
             }
 
@@ -78,20 +82,15 @@ namespace Projekt1.page
             _position = 0;
         }
 
-        public bool IsFull(Record record)
+        public bool IsFull()
         {
-            return _currentSize > PageSize - record.GetSavedRecordSize();
+            return _currentSize > PageSize - Record.GetRecordSavedSize();
         }
 
         public bool IsEmpty()
         {
             return _currentSize == _position;
         }
-        
-        public static int GetPageSize()
-        {
-            return PageSize;
-        }
-        
+
     }
 }

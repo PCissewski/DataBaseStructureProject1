@@ -4,58 +4,51 @@ namespace Projekt1.record
 {
     public class Record
     {
-        private string _person;
+        private string _time;
+        private static int _recordSize = 5;
+        private static int _recordSaveSize = 6;
         /// <summary>
         /// Create record with given Value
         /// </summary>
-        /// <param name="person">string of a name of the person</param>
-        public Record(string person)
+        /// <param name="time">string of a name of the person</param>
+        public Record(string time)
         {
-            _person = person;
+            _time = time;
         }
 
         public string GetRecord()
         {
-            return _person;
+            return _time;
+        }
+
+        public static int GetRecordSavedSize()
+        {
+            return _recordSaveSize;
+        }
+
+        public static int GetRecordSize()
+        {
+            return _recordSize;
         }
         
-        public static String GetSavedValue(byte[] save)
+        public static string GetSavedValue(byte[] save)
         {
             return Encoding.ASCII.GetString(save);
-        }
-        
-        public int GetRecordSize()
-        {
-            return Encoding.ASCII.GetByteCount(_person);
-        }
-        /// <summary>
-        /// Get size of a saved record, +1 because of ';' delimiter
-        /// </summary>
-        /// <returns>number of bytes to save</returns>
-        public int GetSavedRecordSize()
-        {
-            var containsSemiColon = _person.Contains(';');
-
-            if (containsSemiColon)
-            {
-                return Encoding.ASCII.GetByteCount(_person);
-            }
-            return 1 + Encoding.ASCII.GetByteCount(_person);
         }
 
         public string GetValue()
         {
-            return _person;
+            return _time;
         }
 
         public void SetValue(string value)
         {
-            _person = value + _person;
+            _time = value + _time;
         }
         
         public byte[] GetSaveValue()
         {
-            var trimmedString = _person.TrimEnd(';');
+            var trimmedString = _time.TrimEnd(';');
             return  Encoding.ASCII.GetBytes($"{trimmedString};");
         }
         
@@ -65,6 +58,13 @@ namespace Projekt1.record
             var person2 = t.GetValue();
 
             return string.CompareOrdinal(person1, person2);
+        }
+
+        public int CompareTime(Record t)
+        {
+            var t1 = DateTime.Parse(GetValue().TrimEnd(';'));
+            var t2 = DateTime.Parse(t.GetValue().TrimEnd(';'));
+            return DateTime.Compare(t1, t2);
         }
     }
 }
