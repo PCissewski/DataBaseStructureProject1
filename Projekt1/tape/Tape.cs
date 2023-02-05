@@ -37,6 +37,9 @@ namespace Projekt1.tape
 
         public void AddRecord(Record record)
         {
+            if (records.Contains(record))
+                return;
+            
             _lastRecord = record;
             if (_pageBuffer.IsFull())
             {
@@ -61,7 +64,7 @@ namespace Projekt1.tape
             {
                 FillBuffer();
             }
-            
+
             return _pageBuffer.ReadRecord();
         }
 
@@ -87,8 +90,9 @@ namespace Projekt1.tape
             _fs.SetLength(0);
             _fs.Write(newBt,0,value);
             _fs.Close();
-            
+
             _fs = File.Open(OutputFile, FileMode.Open);
+            _fs.SetLength(0);
             _fs.Write(newBt, 0, value);
             _fs.Close();
         }

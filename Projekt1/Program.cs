@@ -9,10 +9,11 @@ namespace Projekt1
             "X:\\Studia\\InformatykaSemestr5\\SBD\\Project1\\Projekt1\\Projekt1\\Logger\\inputTapeContent.txt";
         static void Main(string[] args)
         {
+   
             var app = new ProgramController(new ConsoleWriter());
             var gen = new Generator(args, new Logger());
 
-            app.Run(gen.GenerateTestFile(15));
+            app.Run(gen.GenerateTestFile(10000));
             //app.Run(LoggerFile);
 
         }

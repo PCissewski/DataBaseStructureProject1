@@ -5,11 +5,10 @@ namespace Projekt1
 {
     public class ProgramController
     {
-        private readonly Tape _tape1 = new ("t1.txt");
-        private readonly Tape _tape2 = new ("t2.txt");
-        private readonly Tape _tape3 = new ("t3.txt");
-
-        private int _biggerTape;
+        private readonly Tape _tapeA = new ("tA.txt");
+        private readonly Tape _tapeB = new ("tB.txt");
+        private readonly Tape _tapeC = new ("tC.txt");
+        
         private int _phasesCount;
         private readonly IConsoleWriter _consoleWriter;
 
@@ -18,291 +17,244 @@ namespace Projekt1
             _consoleWriter = consoleWriter;
         }
 
-        private void SplitBetweenTapes()
+        private void SplitBetweenTapes(Tape tapeA, Tape tapeB, Tape tapeC)
         {
-            int fib = 1, fib1 = 0, fib2 = 0;
-            var seriesCounter = 0;
+            var AorB = true; // true - wpisujemy do taśmy A, false wpisujemy do taśmy B
 
-            var tape = _tape1;
-            
-            Record record = null, prevRecord;
-            
-            var tapeChooser = 0;
-            var newSeries = false;
-            var continueSeries = false;
+            Record record = null;
+            Record previousRecord = null;
+            var seriesCount = 0;
+            // flaga oznaczajaca że ostatnio sie zmienila tasma na ktora zapisujemy
+            bool recentlyChangedTape = false;
 
-            var merge = false;
-            var toMergeRecord = "";
-            
-            while (_tape3.CanRead() || record != null)
+            // flaga recently changed ponieważ na końcu odczytu zostaje ostatni rekord
+            while (tapeC.CanRead() || recentlyChangedTape)
             {
-                prevRecord = tape.GetLastRecord();
+                // pobranie poprzedniego rekordu z tasmy do ktorej obecnie zapisujemy
+                // aby porownac z obecnym rekordem z tasmy C czy nadal jest seria
+                previousRecord = AorB ? tapeA.GetLastRecord() : tapeB.GetLastRecord();
 
-                if (!newSeries)
+                if (!recentlyChangedTape) 
                 {
-                    record = _tape3.GetRecord();
-
-                    if (merge)
-                    {
-                        record.SetValue(toMergeRecord);
-                        merge = false;
-                    }
-                
-                    if (!record.GetValue().Contains(';') || record.GetValue() == ";")
-                    {
-                        toMergeRecord = record.GetValue();
-                        merge = true;
-                        continue;
-                    }
-                    
-                }
-                
-                else if (prevRecord != null)
-                {
-                    continueSeries = record?.LexicographicOrder(prevRecord) >= 0;
+                    record = tapeC.GetRecord(); // bierzemy pierwszy rekord
+                    recentlyChangedTape = false;
                 }
 
-                if (record != null && prevRecord != null && record.CompareTime(prevRecord) < 0 && !newSeries)
+                // w pierwszym momencie wykinania while poprzedni rekord zawsze bedzie null
+                if (previousRecord == null)
                 {
-                    if (continueSeries)
-                    {
-                        continueSeries = false;
-                        newSeries = true;
-                    }
-                    else
-                    {
-                        seriesCounter++;
-                        newSeries = true;
-                        if (seriesCounter == fib)
-                        {
-                            fib2 = fib1;
-                            fib1 = fib;
-                            fib = GetNextFibonacci(fib1, fib2);
-                            
-                            tape.SetSeriesCount(seriesCounter);
-                            
-                            tapeChooser = (tapeChooser + 1) % 2;
-                            tape = (tapeChooser == 0) ? _tape1 : _tape2;
-                            
-                            seriesCounter = tape.GetSeriesCount();
-                        }
-                        continue;
-                    }
-
+                    AddToTape(AorB, tapeA, tapeB, record);
+                    recentlyChangedTape = false;
                 }
-
-                if (record == null) continue;
-                tape.AddRecord(record);
-                newSeries = false;
-                record = null;
-
-            }
-            
-            if(!continueSeries)
-                seriesCounter++;
-
-            if (!(continueSeries && fib2 == seriesCounter))
-            {
-                while (true)
+                else
                 {
-                    if (seriesCounter == fib)
+                    var compare = record.CompareTime(previousRecord);
+                    if (compare >= 0)
                     {
-                        tape.SetSeriesCount(seriesCounter);
-                        tapeChooser = (tapeChooser + 1) % 2;
-                        tape = (tapeChooser == 0) ? _tape1 : _tape2;
-                        break;
+                        // seria jest kontynuwoana na danej taśmie
+                        //Console.WriteLine($"Later record: {record.GetValue()}");
+                        AddToTape(AorB, tapeA, tapeB, record);
+                        if (recentlyChangedTape)
+                        {
+                            seriesCount--;
+                            // if (AorB) tapeA.SetSeriesCount(seriesCount);
+                            // else tapeB.SetSeriesCount(seriesCount);
+                        }
+                        recentlyChangedTape = false;
                     }
-                    tape.IncreaseEmptySeriesCount();
-                    seriesCounter++;
-                }
-            }
-
-            _biggerTape = tape == _tape1 ? 1 : 0;
-            
-            _tape1.Flush();
-            _tape2.Flush();
-
-            _consoleWriter.ShowTapeContent(_tape1);
-            _consoleWriter.ShowTapeContent(_tape2);
-            _consoleWriter.ShowReadsWritesToDisk(_tape3, _tape2, _tape1);
-
-            _tape3.DefaultFileSettings();
-        }
-        
-        private Tape PolyPhaseMergeSort()
-        {
-            Tape tapeBig;
-            Tape tapeSmall;
-            var tapeResult = _tape3;
-
-            switch (_biggerTape)
-            {
-                case 1:
-                    tapeBig = _tape2;
-                    tapeSmall = _tape1;
-                    break;
-                case 0:
-                    tapeBig = _tape1;
-                    tapeSmall = _tape2;
-                    break;
-                default:
-                    return new Tape("failTape.txt");
-            }
-      
-            Record recordBig = null;
-            Record recordSmall = null;
-            Record prevRecordBig = null;
-            Record prevRecordSmall = null;
-            Record rec;
-
-            var wroteRecordToBig = true;
-            var wroteRecSmall = true;
-            var endBig = false;
-            bool endSmall;
-            var merge = false;
-            var smallMerge = false;
-            var toMergeRecord = "";
-            
-            while (tapeSmall.CanRead())
-            {
-                var mergedSeries = 0;
-                _phasesCount++;
-                _consoleWriter.ShowTapesContent(_phasesCount, tapeBig, tapeSmall, tapeResult);
-                
-                // merge series
-                while (true)
-                {
-                    if (!endBig && tapeBig.DecreaseEmptySeriesCount()) {
-                        endBig = true;
-                    }
-
-                    if (wroteRecordToBig)
+                    // jezeli jeden jest mniejszy od poprzedniego np. rec = 05:09, prevRec = 13:28
+                    // oraz kiedy ostatnio nie zmieniano tasmy
+                    else if (compare < 0 && !recentlyChangedTape)
                     {
-                        prevRecordBig = recordBig;
-                        recordBig = tapeBig.GetRecord();
-                        if (merge)
-                        {
-                            recordBig.SetValue(toMergeRecord);
-                            merge = false;
-                        }
-                
-                        if (recordBig != null && !recordBig.GetValue().Contains(';'))
-                        {
-                            toMergeRecord = recordBig.GetValue();
-                            merge = true;
-                            continue;
-                        }
-                        wroteRecordToBig = false;
-                    }
+                        // seria na danej taśmie nie jest kontynuowana
+                        //Console.WriteLine($"Earlier record: {record.GetValue()}");
 
-                    if (wroteRecSmall)
-                    {
-                        prevRecordSmall = recordSmall;
-                        recordSmall = tapeSmall.GetRecord();
-                        if (merge)
+                        seriesCount++; // liczba serii na danej tasmie wzrosła o 1
+                        if (AorB)
                         {
-                            recordSmall.SetValue(toMergeRecord);
-                            merge = false;
+                            tapeA.SetSeriesCount(seriesCount);
+                            AorB = false; // zmiana na tasme B
+                            seriesCount = tapeB.GetSeriesCount();
+                            recentlyChangedTape = true;
                         }
-                
-                        if (recordSmall != null && !recordSmall.GetValue().Contains(';'))
+                        else
                         {
-                            toMergeRecord = recordSmall.GetValue();
-                            merge = true;
-                            continue;
+                            tapeB.SetSeriesCount(seriesCount);
+                            AorB = true; // zmiana na tasme A
+                            seriesCount = tapeA.GetSeriesCount();
+                            recentlyChangedTape = true;
                         }
-                        wroteRecSmall = false;
-                    }
-                    
-                    endBig = endBig || recordBig == null ||
-                             (prevRecordBig != null && prevRecordBig.CompareTime(recordBig) > 0);
-
-                    endSmall = recordSmall == null ||
-                               (prevRecordSmall != null && prevRecordSmall.CompareTime(recordSmall) > 0);
-
-                    if (endBig && endSmall)
-                    {
-                        prevRecordBig = null;
-                        prevRecordSmall = null;
-                        endBig = false;
-                        //merged series
-                        mergedSeries++;
                         
-                        if (!tapeSmall.CanRead() && recordSmall == null)
-                        {
-                            tapeResult.Flush();
-                            Console.WriteLine($"Merged series: {mergedSeries}");
-                            _consoleWriter.ShowTapeContent(tapeResult);
-                            break;
-                        }
-                        continue;
                     }
+                    // jezeli ostatnio zmieniano tasmie to znaczy że jest nowa seria
+                    else if (compare < 0 && recentlyChangedTape)
+                    {
 
-
-                    if ((recordBig == null || endBig) && recordSmall != null)
-                    {
-                        rec = recordSmall;
-                    }
-                    else if (recordSmall == null || endSmall)
-                    {
-                        rec = recordBig;
-                    }
-                    else
-                    {
-                        rec = (recordBig.CompareTime(recordSmall) <= 0) ? recordBig : recordSmall;
-                    }
-                    tapeResult.AddRecord(rec);
-                    if (rec == recordBig)
-                    {
-                        wroteRecordToBig = true;
-                    }
-                    else
-                    {
-                        wroteRecSmall = true;
+                        AddToTape(AorB, tapeA, tapeB, record);
+                        recentlyChangedTape = false;
                     }
                 }
-                tapeSmall.DefaultFileSettings();
-
-                var temp = tapeBig;
-                tapeBig = tapeResult;
-                tapeResult = tapeSmall;
-                tapeSmall = temp;
-
-                recordSmall = recordBig;
-                recordBig = null;
-                wroteRecordToBig = true;
             }
             
-            Console.WriteLine($"Number of phases: {_phasesCount}");
+            // zapisujemy dane na taśmach pomocniczych 
+            tapeA.Flush();
+            tapeB.Flush();
             
-            //tapeSmall.DefaultFileSettings();
-            //tapeResult.Flush();
-            tapeResult.CloseFile();
-            //tapeSmall.Flush();
-            tapeSmall.CloseFile();
+            // czyscimy tasme z danymi na której w fazie łączenia bedziemy zapisaywać scalane serie z taśm A oraz B
+            tapeC.DefaultFileSettings();
             
-            //tapeBig.Flush();
-            tapeBig.CloseFile();
-            _consoleWriter.ShowReadsWritesToDisk(_tape3, _tape2, _tape1);
-            return tapeBig;
+            _consoleWriter.ShowTapeContent(tapeA);
+            _consoleWriter.ShowTapeContent(tapeB);
+            _consoleWriter.ShowReadsWritesToDisk(tapeC, tapeB, tapeA);
         }
 
-        private void Sort()
+        private void AddToTape(bool AorB, Tape tapeA, Tape tapeB, Record record)
         {
-            SplitBetweenTapes();
-            var sortedTape = PolyPhaseMergeSort();
-            sortedTape.MakeReadable();
+            if (AorB) tapeA.AddRecord(record);
+            else tapeB.AddRecord(record);
         }
 
-        public void Run(string outputFile)
+        private void Merge(Tape tapeA, Tape tapeB, Tape tapeC)
         {
-            DataLoader.LoadData(_tape3, outputFile);
-            Sort();
+            // 4. Powtarzamy punkt 3 tak długo, aż serie w którejś z taśm się skończą
+            // Jeśli w którejś z taśm jeszcze są serie, kopiujemy to co zostało na koniec taśmy C
+            bool endASeries = false;
+            bool endBSeries = false;
+            
+            var recordA = tapeA.GetRecord();
+            var recordB = tapeB.GetRecord();
+            Record previousRecordA = null;
+            Record previousRecordB = null;
+
+            var aWritten = false;
+            var bWritten = false;
+
+            var seriesCount = 0;
+            
+            while (tapeA.CanRead() || tapeB.CanRead())
+            {
+                // 3. Bierzemy po jednej serii z każdej z taśm (a i b) i scalamy je do taśmy C
+                while (!endASeries || !endBSeries)
+                {
+                    // rozmieszczenie
+                    if (!endASeries && !endBSeries)
+                    {
+                        // patrzymy który rekord jest mniejszy i ten wpisujemy do taśmy C z danymi
+                        // np. 10:40 i 12:13 - wynikiem tego porównania wpisujemy 10:40 na taśme C
+                        if (recordA.CompareTime(recordB) < 0)
+                        {
+                            tapeC.AddRecord(recordA);
+                            previousRecordA = recordA;
+                            aWritten = true;
+                        }
+                        else
+                        {
+                            tapeC.AddRecord(recordB);
+                            previousRecordB = recordB;
+                            bWritten = true;
+                        }
+                    }
+
+                    if (!endASeries && endBSeries)
+                    {
+                        tapeC.AddRecord(recordA);
+                        previousRecordA = recordA;
+                        aWritten = true;
+                    }
+
+                    if (endASeries && !endBSeries)
+                    {
+                        tapeC.AddRecord(recordB);
+                        previousRecordB = recordB;
+                        bWritten = true;
+                    }
+
+                    if (aWritten)
+                    {
+                        recordA = tapeA.GetRecord();
+                        aWritten = false;
+                    }
+
+                    if (bWritten)
+                    {
+                        recordB = tapeB.GetRecord();
+                        bWritten = false;
+                    }
+
+                    if (recordA == null || previousRecordA != null && recordA.CompareTime(previousRecordA) < 0)
+                    {
+                        endASeries = true;
+                    }
+
+                    if (recordB == null || previousRecordB != null && recordB.CompareTime(previousRecordB) < 0)
+                    {
+                        endBSeries = true;
+                    }
+                    
+                    if (endASeries && endBSeries) seriesCount++;
+
+                }
+
+                endASeries = false;
+                endBSeries = false;
+                previousRecordA = null;
+                previousRecordB = null;
+
+                if (!tapeA.CanRead())
+                {
+                    endASeries = true;
+                }
+
+                if (!tapeB.CanRead())
+                {
+                    endBSeries = true;
+                }
+
+            }
+            // zapisujemy liczbe serii na taśmie C
+            tapeC.SetSeriesCount(seriesCount);
+            tapeC.Flush();
+            
+            // czyscimy tasmy pomocnicze
+            _tapeA.DefaultFileSettings();
+            _tapeB.DefaultFileSettings();
+            
+            _consoleWriter.ShowTapeContent(tapeC);
+            _consoleWriter.ShowReadsWritesToDisk(tapeC, tapeB, tapeA);
         }
 
-        private int GetNextFibonacci(int f1, int f2)
+        private void Process()
         {
-            return f1 + f2;
+            Console.ForegroundColor = ConsoleColor.Magenta;
+            Console.WriteLine($"Initial tape content to sort: \n");
+            _consoleWriter.ShowTapeContent(_tapeC);
+            Console.ResetColor();
+            
+            // 5. Powtarzamy punkty 2-4 do momentu, gdy w taśmie c będzie tylko jedna seria
+            while (_tapeC.GetSeriesCount() != 1)
+            {
+                _phasesCount++;
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"Phase number {_phasesCount}\n");
+                Console.ResetColor();
+                
+                // 2. Szukamy serii i kopiujemy je na przemian do taśmy A oraz B
+                SplitBetweenTapes(_tapeA, _tapeB, _tapeC);
+
+                // faza łączenia
+                Merge(_tapeA, _tapeB, _tapeC);
+            }
+            
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"Total number of phases: {_phasesCount}\n");
+            Console.ResetColor();
+            
+        }
+
+        public void Run(string inputFile)
+        {
+            DataLoader.LoadData(_tapeC, inputFile); //1. Kopiujemy dane z pliku źródłowego do taśmy z danymi C.
+            Process();
         }
     }
 }
